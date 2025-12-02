@@ -1,0 +1,182 @@
+\usepackage{tikz}
+\usepackage{xparse}
+\usepackage{tikz-3dplot}
+
+\ExplSyntaxOn
+
+% 获取字符串指定位置字符的函数
+\cs_new:Npn \__fcube_getchar:nn #1 #2
+{
+    \str_item:nn {#1} {#2}
+}
+
+% 颜色映射辅助宏 - 使用LaTeX3正确语法
+\cs_new:Npn \__fcube_color:n #1
+{
+    \str_if_eq:nnTF {#1} {g}
+        {gray!30}
+        {
+            \str_if_eq:nnTF {#1} {b}
+                {blue}
+                {
+                    \str_if_eq:nnTF {#1} {r}
+                        {red}
+                        {
+                            \str_if_eq:nnTF {#1} {w}
+                                {white}
+                                {gray!30}
+                        }
+                }
+        }
+}
+
+% 主宏定义：\FtwoLcube{正面参数}{右侧面参数}[顶面参数]
+\NewDocumentCommand \FtwoLcube { m m O{ggggggggg} }
+{
+    \group_begin:
+    % 设置3D视角：从右上看，theta=65度，phi=35度
+    \tdplotsetmaincoords{65}{35}
+
+    \begin{tikzpicture}[scale=0.8, baseline=(current~bounding~box.center), tdplot_main_coords]
+
+    % 定义魔方的基本尺寸
+    \def \cubelen {1}
+
+    % ==================== 绘制顶面 ====================
+    % 顶面位置（3x3网格，z=1平面）
+    % 坐标：(x, y, z) 其中 z=1
+
+    % 顶面第1行（左下）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {7} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (0, 0, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第2行（中下）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {8} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (\cubelen, 0, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第3行（右下）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {9} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (2*\cubelen, 0, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第4行（左中）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {4} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (0, \cubelen, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第5行（中中）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {5} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (\cubelen, \cubelen, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第6行（右中）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {6} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (2*\cubelen, \cubelen, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第7行（左上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {1} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (0, 2*\cubelen, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第8行（中上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {2} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (\cubelen, 2*\cubelen, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 顶面第9行（右上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#3} {3} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (2*\cubelen, 2*\cubelen, 1) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % ==================== 绘制右侧面 ====================
+    % 右侧面位置（y=0平面，x从1到3，z从0到1）
+
+    % 右侧面第1列（左下）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#2} {1} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (1*\cubelen, 0, 0) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    % 右侧面第2列（左中）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#2} {2} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (1*\cubelen, 0, 1) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    % 右侧面第3列（左上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#2} {3} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (1*\cubelen, 0, 2*\cubelen) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    % 右侧面第4列（中下）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#2} {4} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (2*\cubelen, 0, 0) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    % 右侧面第5列（中上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#2} {5} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 0.5pt]
+        (2*\cubelen, 0, 1) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    % 固定红色块（右侧两列，x=2和x=3）
+    \fill [fill = red, draw = white, line ~ width = 0.5pt]
+        (3*\cubelen, 0, 0) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+    \fill [fill = red, draw = white, line ~ width = 0.5pt]
+        (3*\cubelen, 0, 1) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+    \fill [fill = red, draw = white, line ~ width = 0.5pt]
+        (3*\cubelen, 0, 2*\cubelen) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    \fill [fill = red, draw = white, line ~ width = 0.5pt]
+        (4*\cubelen, 0, 1) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+    \fill [fill = red, draw = white, line ~ width = 0.5pt]
+        (4*\cubelen, 0, 2*\cubelen) -- ++(0, 0, \cubelen) -- ++(0, \cubelen, 0) -- ++(0, 0, -\cubelen) -- cycle;
+
+    % ==================== 绘制正面 ====================
+    % 正面位置（z=0平面，x从0到2，y从0到2）
+
+    % 正面第1列（左上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#1} {1} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 1pt]
+        (0, 2*\cubelen, 0) -- ++(\cubelen, 0, 0) -- ++(0, -\cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 正面第2列（中上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#1} {2} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 1pt]
+        (\cubelen, 2*\cubelen, 0) -- ++(\cubelen, 0, 0) -- ++(0, -\cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 正面第3列（右上）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#1} {3} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 1pt]
+        (2*\cubelen, 2*\cubelen, 0) -- ++(\cubelen, 0, 0) -- ++(0, -\cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 正面第4列（右中）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#1} {4} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 1pt]
+        (2*\cubelen, \cubelen, 0) -- ++(\cubelen, 0, 0) -- ++(0, -\cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 正面第5列（右下）
+    \tl_set:Nx \l_tmpa_tl { \__fcube_getchar:nn {#1} {5} }
+    \fill [fill = \__fcube_color:n { \l_tmpa_tl }, draw = white, line ~ width = 1pt]
+        (2*\cubelen, 0, 0) -- ++(\cubelen, 0, 0) -- ++(0, -\cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    % 固定蓝色块（左下角2x2，x=0,1 和 y=0,1）
+    \fill [fill = blue, draw = white, line ~ width = 1pt]
+        (0, 0, 0) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+    \fill [fill = blue, draw = white, line ~ width = 1pt]
+        (\cubelen, 0, 0) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+    \fill [fill = blue, draw = white, line ~ width = 1pt]
+        (0, \cubelen, 0) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+    \fill [fill = blue, draw = white, line ~ width = 1pt]
+        (\cubelen, \cubelen, 0) -- ++(\cubelen, 0, 0) -- ++(0, \cubelen, 0) -- ++(-\cubelen, 0, 0) -- cycle;
+
+    \end{tikzpicture}
+    \group_end:
+}
+
+\ExplSyntaxOff
+
+% 使用示例宏
+\newcommand{\FtwoLcubeExample}[1]{%
+    \FtwoLcube{ggwgg}{ggbrg}[gggggrggb]%
+}
