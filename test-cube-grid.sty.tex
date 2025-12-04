@@ -1,0 +1,43 @@
+\documentclass{ctexart}
+\usepackage{cube-grid}
+
+\begin{document}
+
+\section*{使用 cube-grid 库的九宫格示例}
+
+\subsection*{默认参数（x=1cm, y=1cm）}
+
+\noindent
+\begin{tikzpicture}
+\drawsquares{gggrbwgrg}
+\end{tikzpicture}
+
+\subsection*{自定义参数（x=0.8cm, y=0.8cm）}
+
+\noindent
+\begin{tikzpicture}
+    \drawsquares[x=0.8cm, y=0.8cm]{gggrbwgrg}
+\end{tikzpicture}
+
+\subsection*{自定义参数（x=1.5cm, y=1.5cm）}
+
+\noindent
+\begin{tikzpicture}
+    \drawsquares[x=1.5cm, y=1.5cm]{bbbrrrwww}
+\end{tikzpicture}
+
+\subsection*{在已有 tikz 环境中的 scope 嵌套}
+
+\noindent
+\begin{tikzpicture}[x=2cm, y=2cm]
+    % 绘制外框
+    \draw[thick, black] (0, 0) rectangle (3, 3);
+
+    % 嵌套九宫格
+    \drawsquares{gggrbwgrg}
+
+    % 添加额外的标记
+    \draw[red, thick] (1.5, 1.5) circle [radius=0.2];
+\end{tikzpicture}
+
+\end{document}

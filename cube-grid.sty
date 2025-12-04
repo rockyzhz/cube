@@ -1,0 +1,46 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cube-grid}[2025/12/04 Cube Grid Drawing Library]
+
+\RequirePackage{tikz}
+\RequirePackage{expl3}
+\RequirePackage{xparse}
+
+\ExplSyntaxOn
+
+\int_new:N \l_cube_tmpc_int
+\tl_new:N \l_cube_tmpd_tl
+
+% 定义颜色映射
+\prop_new:N \g_cube_color_map_prop
+\prop_gput:Nnn \g_cube_color_map_prop {g} {gray}
+\prop_gput:Nnn \g_cube_color_map_prop {b} {blue}
+\prop_gput:Nnn \g_cube_color_map_prop {r} {red}
+\prop_gput:Nnn \g_cube_color_map_prop {w} {white}
+
+% 主函数：根据字符串绘制彩色正方形（九宫格排列）
+% 使用 scope 环境，可以嵌套在其他 tikz 环境中
+% 支持可选参数，默认 x=1cm, y=1cm
+\NewDocumentCommand \drawsquares { O{x=1cm, y=1cm} m } {
+    \begin{scope}[#1]
+        \int_zero:N \l_tmpa_int  % 用于计数
+
+        % 按行优先顺序排列（第一行，然后第二行，最后第三行）
+        \str_map_inline:nn {#2} {
+            \int_incr:N \l_tmpa_int
+
+            % 计算行和列（从0开始）
+            \int_set:Nn \l_tmpb_int {\int_div_truncate:nn {\l_tmpa_int - 1} {3}}  % 行号 (0,1,2)
+            \int_set:Nn \l_cube_tmpc_int {\int_mod:nn {\l_tmpa_int - 1} {3}}           % 列号 (0,1,2)
+
+            % 获取颜色
+            \prop_get:NnN \g_cube_color_map_prop {##1} \l_cube_tmpd_tl
+
+            % 绘制正方形（1cm边长，填充对应颜色，白色描边，2pt线宽）
+            % 注意：Y坐标需要反转（第一行在顶部）
+            \fill[\l_cube_tmpd_tl, draw=white, line~width=2pt]
+                (\l_cube_tmpc_int, 2 - \l_tmpb_int) rectangle ++(1, 1);
+        }
+    \end{scope}
+}
+
+\ExplSyntaxOff
