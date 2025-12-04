@@ -9,21 +9,21 @@
 
 \noindent
 \begin{tikzpicture}
-\drawsquares{gggrbwgrg}
+\drawsquares{x=1cm, y=1cm}{---rbw-r-}
 \end{tikzpicture}
 
 \subsection*{自定义参数（x=0.8cm, y=0.8cm）}
 
 \noindent
 \begin{tikzpicture}
-    \drawsquares[x=0.8cm, y=0.8cm]{gggrbwgrg}
+    \drawsquares{x=0.8cm, y=0.8cm}{---rbw-r-}
 \end{tikzpicture}
 
 \subsection*{自定义参数（x=1.5cm, y=1.5cm）}
 
 \noindent
 \begin{tikzpicture}
-    \drawsquares[x=1.5cm, y=1.5cm]{bbbrrrwww}
+    \drawsquares{x=1.5cm, y=1.5cm}{bbbrrrwww}
 \end{tikzpicture}
 
 \subsection*{在已有 tikz 环境中的 scope 嵌套}
@@ -34,7 +34,7 @@
     \draw[thick, black] (0, 0) rectangle (3, 3);
 
     % 嵌套九宫格
-    \drawsquares{gggrbwgrg}
+    \drawsquares{x=1cm, y=1cm}{---rbw-r-}
 
     % 添加额外的标记
     \draw[red, thick] (1.5, 1.5) circle [radius=0.2];
