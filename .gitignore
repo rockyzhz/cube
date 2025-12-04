@@ -1,1 +1,39 @@
 *.pdf
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lot
+*.lof
+*.toc
+*.idx
+*.ind
+*.ilg
+*.xdv
+
+# LaTeX beamer files
+*.nav
+*.snm
+*.vrb
+*.cut
+
+# LaTeX temporary files
+*.tmp
+*.swp
+*.swo
+*~
+missfont.log
+
+# macOS
+.DS_Store
+
+# LaTeX backup files
+*.bak
+*.backup
