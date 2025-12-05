@@ -1,0 +1,17 @@
+\documentclass{ctexart}
+\usepackage{cube-grid}
+
+\NewDocumentCommand{\red}{ m }{\textcolor{red}{#1}}
+\begin{document}
+
+\section*{F2L 公式示例}
+
+这里演示使用 coffin 布局的 F2L 公式：
+
+\bigskip
+
+\FTwoL{-rrw-}{---w-}{-brw-br-b}{R U \red{R'} U' R U R'\\R U \red{R'} U' R U R'}
+\FTwoL{-brw-}{-brw-}{-brw-br-b}{R U R' U'}
+\FTwoL{-r-w-}{-rr--}{-rr-rr-rw}{U' R' U R}
+
+\end{document}

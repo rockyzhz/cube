@@ -2,12 +2,15 @@
 \ProvidesPackage{cube-grid}[2025/12/04 Cube Grid Drawing Library]
 
 \RequirePackage{tikz}
+\RequirePackage{xcoffins}
 \RequirePackage{expl3}
 \RequirePackage{xparse}
 
 \ExplSyntaxOn
 
 \int_new:N \l_cube_tmpc_int
+\int_new:N \l_cube_tmpb_int
+\int_new:N \l_cube_tmpa_int
 \tl_new:N \l_cube_tmpd_tl
 \str_new:N \l_cube_front_expanded
 \str_new:N \l_cube_right_expanded
@@ -15,6 +18,7 @@
 % 定义颜色映射
 \prop_new:N \g_cube_color_map_prop
 \prop_gput:Nnn \g_cube_color_map_prop {-} {gray}
+\prop_gput:Nnn \g_cube_color_map_prop {g} {gray}
 \prop_gput:Nnn \g_cube_color_map_prop {b} {blue}
 \prop_gput:Nnn \g_cube_color_map_prop {r} {red}
 \prop_gput:Nnn \g_cube_color_map_prop {w} {white}
@@ -24,23 +28,23 @@
 % 支持可选参数，默认 x=1cm, y=1cm
 \NewDocumentCommand \drawsquares { m m } {
     \begin{scope}[#1]
-        \int_zero:N \l_tmpa_int  % 用于计数
+        \int_zero:N \l_cube_tmpa_int
 
         % 按行优先顺序排列（第一行，然后第二行，最后第三行）
         \str_map_inline:nn {#2} {
-            \int_incr:N \l_tmpa_int
+            \int_incr:N \l_cube_tmpa_int
 
             % 计算行和列（从0开始）
-            \int_set:Nn \l_tmpb_int {\int_div_truncate:nn {\l_tmpa_int - 1} {3}}  % 行号 (0,1,2)
-            \int_set:Nn \l_cube_tmpc_int {\int_mod:nn {\l_tmpa_int - 1} {3}}           % 列号 (0,1,2)
+            \int_set:Nn \l_cube_tmpb_int {\int_div_truncate:nn {\l_cube_tmpa_int - 1} {3}}  % 行号 (0,1,2)
+            \int_set:Nn \l_cube_tmpc_int {\int_mod:nn {\l_cube_tmpa_int - 1} {3}}           % 列号 (0,1,2)
 
             % 获取颜色
             \prop_get:NnN \g_cube_color_map_prop {##1} \l_cube_tmpd_tl
 
             % 绘制正方形（1cm边长，填充对应颜色，白色描边，2pt线宽）
             % 注意：Y坐标需要反转（第一行在顶部）
-            \fill[\l_cube_tmpd_tl, draw=white, line~width=\pgflinewidth] 
-                (\l_cube_tmpc_int, 2 - \l_tmpb_int) rectangle ++(1, 1);
+            \fill[\l_cube_tmpd_tl, draw=white, line~width=\pgflinewidth]
+                (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle ++(1, 1);
         }
     \end{scope}
 }
@@ -50,7 +54,7 @@
 % 第一个参数：正面五个字符（ABCDE -> ABCDbbEbb）
 % 第二个参数：右侧面五个字符（ABCDE -> CDEBrrArr）
 % 第三个参数：顶面九个字符（直接使用原参数）
-% 第四个参数：尺寸参数（可选，默认1cm）
+% 第四个参数：尺寸参数（可选，默认3mm）
 \NewDocumentCommand \Cube { m m m O{3mm} } {
     % 扩展正面参数：ABCDE -> ABCDbbEbb
     \str_set:Ne \l_cube_front_expanded {
@@ -68,27 +72,75 @@
         rr
         \str_item:nn {#2} {1}
         rr
-        }
-        
-    % 绘制三面视图
-    % \exp_args:NV \drawsquares{\l_cube_front_expanded}
-    % \drawsquares{\l_cube_right_expanded}
+    }
 
-    % 使用独立的 tikz picture 环境包裹所有绘制
+    % 绘制三面视图
     \begin{scope}[x=#4, y=#4]
-       % 绘制正面
+        % 绘制正面
         \exp_args:NnV \drawsquares{ x=#4, y=#4 }{\l_cube_front_expanded}
 
-       % 绘制右侧面（带倾斜效果）
+        % 绘制右侧面（带倾斜效果）
         \begin{scope}[xshift=3*#4]
             \exp_args:NnV \drawsquares{ x=0.35*#4, y=#4, yslant=1 }{\l_cube_right_expanded}
         \end{scope}
 
-       % 绘制顶面（带倾斜效果）
+        % 绘制顶面（带倾斜效果）
         \begin{scope}[yshift=3*#4]
             \drawsquares{ x=#4, y=0.35*#4, xslant=1 }{#3}
         \end{scope}
     \end{scope}
+}
+
+% F2L 宏：用于绘制第一二层公式
+\int_new:N \g_cube_ffl_index_int
+
+% 创建三个 coffin：序号、魔方图、公式
+\NewCoffin \l_cube_index_coffin
+\NewCoffin \l_cube_cube_coffin
+\NewCoffin \l_cube_formula_coffin
+
+% 创建一个包含序号+内容的 coffin
+\NewCoffin \l_cube_coffin_output
+
+\NewDocumentCommand \FTwoL { m m m O{3mm} m } {
+    \SetHorizontalCoffin \l_cube_coffin_output {}
+
+    % 自动增长序号
+    \int_gincr:N \g_cube_ffl_index_int
+
+    % 填充序号
+    \SetHorizontalCoffin \l_cube_index_coffin {\int_use:N \g_cube_ffl_index_int}
+
+    % 填充魔方图
+    \SetHorizontalCoffin \l_cube_cube_coffin {
+        \begin{tikzpicture}
+            \Cube{#1}{#2}{#3}[#4]
+        \end{tikzpicture}
+    }
+
+    % 填充公式
+    \tl_set:Ne \l_tmpa_tl {%
+        \raggedright% 左对齐文本
+        \itshape% 公式用斜体
+        #5%
+    }
+
+    % 注意：不要删除空格，否则无法正确断行
+    \regex_replace_all:nnN { [\ ]+ } { } \l_tmpa_tl
+
+    % 让内容在 2cm 宽度内左对齐
+    \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\l_tmpa_tl}
+
+    % 连接魔方和公式（水平对齐）
+    \JoinCoffins \l_cube_coffin_output [hc,vc] \l_cube_index_coffin [l,vc]
+    \JoinCoffins \l_cube_coffin_output [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (1em,0pt)
+    \JoinCoffins \l_cube_coffin_output [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (1em,0pt)
+
+    % 输出（上下居中对齐）
+    \vspace{3pt}
+    \TypesetCoffin \l_cube_coffin_output
+    \vspace{3pt}
+    \par
 }
 
 \ExplSyntaxOff

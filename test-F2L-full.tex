@@ -1,0 +1,72 @@
+\documentclass{ctexart}
+\usepackage{cube-grid}
+
+
+\begin{document}
+\ExplSyntaxOn % 启用LaTeX3语法
+
+\section*{所有 F2L 公式}
+
+% 定义序列（变量名中不能有数字）
+\seq_new:N \g_cube_ffl_all_seq
+
+% 一次性设置序列（用逗号分隔）
+\seq_set_from_clist:Nn \g_cube_ffl_all_seq {
+    {{---rb}{rb---}{---------}{R U R' U' R U R'}}, % 1
+    {{-b--b}{r----}{-------r-}{R U R' U'}}, % 2
+    {{----b}{r--r-}{-----b---}{U' R' U R}}, % 3
+    {{---bw}{br---}{---------}{U R U' R'}}, % 4
+    {{---rw}{bb---}{---------}{U R U' R' U R U' R'}}, % 5
+    {{-b--w}{b----}{-------r-}{R U' R' U R U R'}}, % 6
+    {{----w}{b--r-}{-----b---}{U' R' U R U' R' U R}}, % 7
+    {{---bw}{wr---}{---------}{R U R' U' R U R' U' R U R'}}, % 8
+    {{---rr}{wb---}{---------}{R U R' U' R U R' U R U' R'}}, % 9
+    {{-b--r}{w----}{-------r-}{U R U' R' U R U R'}}, % 10
+    {{----r}{w--r-}{-----b---}{U' R' U R U' R' U R}}, % 11
+    {{--rr-}{-bb--}{--------w}{R U' R' U R U R' U'}}, % 12
+    {{--rr-}{-bb--}{--------w}{U R U' R' U R U' R'}}, % 13
+    {{-br--}{--b--}{-------rw}{U' R' U R U' R' U R}}, % 14
+    {{--r--}{--b--}{---r----w}{U R U' R' U R U R'}}, % 15
+    {{--r--}{--b--}{-r------w}{U' R' U R U' R' U R}}, % 16
+    {{--r--}{--bb-}{-----r--w}{R U' R'}}, % 17
+    {{-rr--}{--b--}{-------bw}{U R U' R'}}, % 18
+    {{--r--}{--b--}{---b----w}{R U' R'}}, % 19
+    {{--r--}{--b--}{-b------w}{R U R' U}}, % 20
+    {{--r--}{--br-}{-----b--w}{U R U' R' U}}, % 21
+    {{--wb-}{-rr--}{--------b}{R U R' U' R U R'}}, % 22
+    {{--wr-}{-br--}{--------b}{U R U' R'}}, % 23
+    {{-bw--}{--r--}{-------rb}{U' R' U R}}, % 24
+    {{--w--}{--r--}{---r----b}{R U' R' U R U R'}}, % 25
+    {{--w--}{--r--}{-r------b}{U R U' R'}}, % 26
+    {{--w--}{--rb-}{-----r--b}{U' R' U R}},% 27
+    {{-rw--}{--r--}{-------bb}{R U R' U' R U R'}}, % 28
+    {{--w--}{--r--}{---b----b}{U R U' R'}}, % 29
+    {{--w--}{--r--}{-b------b}{U' R' U R}},% 30
+    {{--w--}{--rr-}{-----b--b}{R U R' U' R U R'}}, % 31
+    {{--bb-}{-rw--}{--------r}{R U R' U'}}, % 32
+    {{--br-}{-bw--}{--------r}{U' R' U R}}, % 33
+    {{-bb--}{--w--}{-------rr}{U R U' R'}}, % 34
+    {{--b--}{--w--}{---r----r}{U R U' R' U R U' R'}}, % 35
+    {{--b--}{--w--}{-r------r}{R U' R' U R U R'}}, % 36
+    {{--b--}{--wb-}{-----r--r}{R U R' U' R U R' U' R U R'}}, % 37
+    {{-rb--}{--w--}{-------br}{R U R' U' R U R' U R U' R'}}, % 38
+    {{--b--}{--w--}{---b----r}{U R U' R' U R U R'}}, % 39
+    {{--b--}{--w--}{-b------r}{R U' R'}}, % 40
+    {{--b--}{--wr-}{-----b--r}{U R U' R'}} % 41
+}
+
+% 包装函数：将 {{#1}{#2}{#3}{#4}} 拆成 #1 #2 #3 #4
+\cs_new:Npn \FTwoL_wrapper:n #1 {
+    \FTwoL_split:w #1 \q_stop
+}
+
+\cs_new:Npn \FTwoL_split:w #1 #2 #3 #4 \q_stop {
+    \FTwoL {#1} {#2} {#3} {#4}
+}
+
+% 映射调用
+\seq_map_function:NN \g_cube_ffl_all_seq \FTwoL_wrapper:n
+
+\ExplSyntaxOff
+
+\end{document}
