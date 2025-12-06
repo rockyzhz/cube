@@ -106,6 +106,12 @@
 % 创建一个包含序号+内容的 coffin
 \NewCoffin \l_cube_coffin_output
 
+% 定义全局变量存储每个FTwoL的高度（以pt为单位）
+\newlength{\gfflheight}
+\setlength{\gfflheight}{0pt}
+\newlength{\gfflwidth}
+\setlength{\gfflwidth}{0pt}
+
 \NewDocumentCommand \FTwoL { m m m O{5mm} m } {
     \SetHorizontalCoffin \l_cube_coffin_output {}
 
@@ -146,11 +152,19 @@
     \JoinCoffins \l_cube_coffin_output [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
     \JoinCoffins \l_cube_coffin_output [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (1em,0pt)
 
+    % 缩放整体到合适大小
+    \ScaleCoffin \l_cube_coffin_output {0.7} {0.7}
+
+    % 获取缩放后的实际高度并存储
+    \setlength{\gfflheight}{\CoffinHeight \l_cube_coffin_output}
+    \addtolength{\gfflheight}{6pt}  % 额外增加垂直间距
+    \setlength{\gfflwidth} {\CoffinWidth \l_cube_coffin_output}
+
     % 输出（上下居中对齐）
     \vspace{3pt}
     \TypesetCoffin \l_cube_coffin_output
     \vspace{3pt}
-    \par
+    % \par
 }
 
 \ExplSyntaxOff
