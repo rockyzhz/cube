@@ -9,6 +9,7 @@
 *.log
 *.out
 *.synctex.gz
+*.synctex(busy)
 *.toc
 *.lot
 *.lof
