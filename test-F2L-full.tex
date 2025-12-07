@@ -79,21 +79,23 @@
 % 关闭LaTeX3语法以正确解析tcolorbox键名
 \ExplSyntaxOff
 
-% ==================== 预先测量高度 ====================
-% 先用第一个公式来实际测量高度，初始化\gfflheight
-\newsavebox{\gfflmeasurebox}
-\sbox{\gfflmeasurebox}{
-    \begin{tcolorbox}[blankest]
-        \FTwoL{-----}{-----}{---------}{(RUR')}
-    \end{tcolorbox}
-}
+% % ==================== 预先测量高度 ====================
+% % 先用第一个公式来实际测量高度，初始化\gfflheight
+% \newsavebox{\gfflmeasurebox}
+% \sbox{\gfflmeasurebox}{
+%     \begin{tcolorbox}[blankest]
+%         \FTwoL{-----}{-----}{---------}{(RUR')}
+%     \end{tcolorbox}
+% }
+% \the\gfflheight
+% \the\ht\gfflmeasurebox
 
 % ==================== 第1步：一次性生成并自动分页储存 ====================
 % 使用实际测量的高度：41个公式，每11个一页，最后一个页面8个公式
 \begin{tcolorbox}[
     blankest,
     breakable,
-    break at=11\gfflheight, % 11个公式一页高度（使用实际测量值）
+    break at=11.2\gfflheight, % 11个公式一页高度（使用实际测量值）
     width=.25\textwidth,  % 宽度固定为所有公式宽度
     halign=center,
     height fixed for=all,
@@ -116,7 +118,6 @@
 \begin{tcolorbox}[blankest,height=11.3\gfflheight+2pt,width=\linewidth,halign=center]
     \begin{tcolorbox}[
         enhanced,
-        sharp corners,
         colback=myblue,
         colframe=black!70,
         nobeforeafter,
@@ -124,7 +125,7 @@
         before={\parindent0pt},  % 去掉首行缩进
         after skip=0pt,
         boxrule=0.6pt,
-        arc=3pt,
+        arc=5mm,
         boxsep=0mm,
         title={\heiti 公式示意图（4列布局）},  % 标题
         fonttitle=\bfseries,
