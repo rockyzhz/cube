@@ -72,27 +72,36 @@
     \FTwoL_split:w #1 \q_stop
 }
 
-% \ExplSyntaxOn
 \cs_new:Npn \FTwoL_split:w #1 #2 #3 #4 \q_stop {
     \hbox{\FTwoL {#1} {#2} {#3} {#4}}
 }
+
 % 关闭LaTeX3语法以正确解析tcolorbox键名
 \ExplSyntaxOff
-        
+
+% ==================== 预先测量高度 ====================
+% 先用第一个公式来实际测量高度，初始化\gfflheight
+\newsavebox{\gfflmeasurebox}
+\sbox{\gfflmeasurebox}{
+    \begin{tcolorbox}[blankest]
+        \FTwoL{-----}{-----}{---------}{(RUR')}
+    \end{tcolorbox}
+}
+
 % ==================== 第1步：一次性生成并自动分页储存 ====================
-% 计算总高度：41个公式，每11个一页，最后一个页面8个公式
-% 假设每个公式盒子高度约18ex
+% 使用实际测量的高度：41个公式，每11个一页，最后一个页面8个公式
 \begin{tcolorbox}[
     blankest,
     breakable,
-    break at=11\gfflheight, % 11个公式一页高度
+    break at=11\gfflheight, % 11个公式一页高度（使用实际测量值）
     width=.25\textwidth,  % 宽度固定为所有公式宽度
-    halign=center, 
+    halign=center,
     height fixed for=all,
     % boxrule=0.2pt,
     reset and store to box array,
 ]
 \ExplSyntaxOn
+\int_zero:N \g_cube_ffl_index_int
 \seq_map_function:NN \g_cube_ffl_all_seq \FTwoL_wrapper:n
 \ExplSyntaxOff
 % \mbox{\hspace{\gfflwidth}\vspace{3\gfflheight}} % 最后留点空白
@@ -104,31 +113,29 @@
 \setlength\tabcolsep{.5em}         % 表格内边距为1em
 \newcolumntype{C}{>{\centering\arraybackslash}X}  % 对于X列
 
-\begin{tcolorbox}[
-    enhanced,
-    sharp corners,
-    colback=myblue,
-    colframe=black!70,
-    nobeforeafter,
-    before skip=0pt,
-    before={\parindent0pt},  % 去掉首行缩进
-    after skip=0pt,
-    boxrule=0.6pt,
-    arc=3pt,
-    boxsep=0mm,
-    title={\heiti 公式示意图（4列布局）},  % 标题
-    fonttitle=\bfseries,
-    % 关键：使用tabularx属性直接创建4列表格（默认顶部对齐）
-    % tabulars={@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}},  % 4列等宽，顶部对齐，带分隔线
-    tabularx={X|X|X|X},  % 4列等宽，顶部对齐，带分隔线
-    width=\linewidth,  % 宽度占满整行
-    % text height=11.2\gfflheight,  % 文本高度为11.2个公式高度
-    % height plus=-.5\gfflheight, % 高度允许减少0.5个公式高度
-    % height=12\gfflheight,  % 高度为11个公式高度
-    % height fill=false,           % 明确不填充高度
-]
-    % 直接使用储存的4个页面，顶部对齐
-    \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4}
+\begin{tcolorbox}[blankest,height=11.3\gfflheight+2pt,width=\linewidth,halign=center]
+    \begin{tcolorbox}[
+        enhanced,
+        sharp corners,
+        colback=myblue,
+        colframe=black!70,
+        nobeforeafter,
+        before skip=0pt,
+        before={\parindent0pt},  % 去掉首行缩进
+        after skip=0pt,
+        boxrule=0.6pt,
+        arc=3pt,
+        boxsep=0mm,
+        title={\heiti 公式示意图（4列布局）},  % 标题
+        fonttitle=\bfseries,
+        % 关键：使用tabularx属性直接创建4列表格（默认顶部对齐）
+        tabularx={X|X|X|X},  % 4列等宽，顶部对齐，带分隔线
+        width=\linewidth,  % 宽度占满整行
+    ]
+        % 直接使用储存的4个页面，顶部对齐
+        \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4}
+    \end{tcolorbox}
 \end{tcolorbox}
+
 
 \end{document}
