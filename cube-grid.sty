@@ -181,10 +181,17 @@
     \vspace{3pt}
     % \par
 
-    % 获取缩放后的实际高度并存储
-    \setlength{\gfflheight}{\CoffinHeight \l_cube_coffin_output}
-    \addtolength{\gfflheight}{6pt}  % 额外增加垂直间距
-    \setlength{\gfflwidth} {\CoffinWidth \l_cube_coffin_output}
+    % % 获取缩放后的实际高度并存储
+    % \setlength{\gfflheight}{\CoffinTotalHeight\l_cube_coffin_output}
+    % \addtolength{\gfflheight}{6pt}  % 额外增加垂直间距
+    % \setlength{\gfflwidth} {\CoffinWidth\l_cube_coffin_output}
 }
 
 \ExplSyntaxOff
+
+% 在文档开始后自动测量第一个FTwoL的高度和宽度
+\AtBeginDocument{
+\setbox0=\hbox{\begin{tcolorbox}[blankest]\FTwoL{-----}{-----}{---------}{(RUR')}\end{tcolorbox}}
+\setlength{\gfflheight}{\ht0}
+\setlength{\gfflwidth} {\wd0}
+}
