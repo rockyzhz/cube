@@ -1,5 +1,7 @@
 \documentclass{ctexart}
 \usepackage{cube-grid}
+\usetikzlibrary{3d}
+\usetikzlibrary{arrows.meta}
 
 \begin{document}
 
@@ -10,8 +12,42 @@
 \noindent
 \begin{tikzpicture}  
 % \Cube{----b--b-}{----r--r-}{---------}[3cm]
-% \Cube{=========}{=--=--=--}{------===}[3cm]
-\Cube{---bb}{rr---}{yyyyyyyyy}[3cm]
+\Cube{=========}{==-==-==-}{---======}[3cm]
+% \Cube{---bb}{rr---}{yyyyyyyyy}[3cm]
+\draw [red,-{Stealth[length=1.5cm]},line width=3pt] (.5,9.5) arc[start angle=115,end angle=-35,x radius=5.5cm,y radius=9.5cm];
+\draw [red,-{Stealth[length=1.5cm]},line width=3pt,xshift=2cm,yshift=1cm] (.5,9.5) arc[start angle=115,end angle=-35,x radius=5.5cm,y radius=9.5cm];
+\end{tikzpicture}
+
+% \begin{tikzpicture}[rotate around y=-22,rotate around z=0]
+\begin{tikzpicture}[
+  x={(340:0.8cm)},  % 从330改为345，更接近水平
+  y={( 90:  1cm)},
+  z={(200:0.8cm)}   % 从210改为195，更接近水平
+]
+  % \draw (0,0,0) -- (3,0,0) -- (3,3,0) -- (0,3,0) -- cycle;
+  % \draw (3,0,0) -- (3,0,-3) -- (3,3,-3) -- (3,3,0) -- cycle;
+  % \draw (0,3,0) -- (0,3,-3) -- (3,3,-3) -- (3,3,0) -- cycle;
+  % \draw (0,1,0) -- (3,1,0) -- (3,1,-3);
+  % \draw (0,2,0) -- (3,2,0) -- (3,2,-3);
+  % \draw (1,0,0) -- (1,3,0) -- (1,3,-3);
+  % \draw (2,0,0) -- (2,3,0) -- (2,3,-3);
+  % \draw (0,3,-1) -- (3,3,-1) -- (3,0,-1);
+  % \draw (0,3,-2) -- (3,3,-2) -- (3,0,-2);
+  
+  % \begin{scope}[canvas is xz plane at y=3]
+  %   \filldraw [fill=blue!30] (0,0) rectangle (3,-3);
+  % \end{scope}
+  
+  \filldraw [fill=blue!30, canvas is xz plane at y=3] (0,0) rectangle (3,-3);
+  % \draw [red,-{Stealth[length=.5cm]},line width=3pt] (0,3,-0.5) arc[start angle=135,end angle=-50,radius=2.12cm];
+  % \draw [red,-{Stealth[length=.5cm]},line width=3pt] (0,0.5,0) arc[start angle=135,end angle=-50,radius=2.12cm];
+  \begin{scope}[canvas is xz plane at y=0.5]
+    \draw [red,-{Stealth[length=.5cm]},line width=3pt] 
+      (0,0) arc[start angle=135,end angle=-50,radius=2.12cm];
+  \end{scope}
+  % \draw (0,0,0) rectangle (3,3,0);
+  % \draw (3,0,0) rectangle (3,3,-3);
+  % \draw (0,0,3) rectangle (3,3,3);
 \end{tikzpicture}
 
 \subsection*{自定义尺寸（3cm）}
