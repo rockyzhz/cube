@@ -2,6 +2,8 @@
 \ProvidesPackage{cube-grid}[2025/12/04 Cube Grid Drawing Library]
 
 \RequirePackage{tikz}
+\usetikzlibrary{3d}
+% \usetikzlibrary{arrows.meta}
 \RequirePackage{xcoffins}
 \RequirePackage{expl3}
 \RequirePackage{etoolbox}
@@ -33,7 +35,6 @@
 
 % 主函数：根据字符串绘制彩色正方形（九宫格排列）
 % 使用 scope 环境，可以嵌套在其他 tikz 环境中
-% 支持可选参数，默认 x=1cm, y=1cm
 \NewDocumentCommand \drawsquares { m m } {
     \begin{scope}[#1]
         \int_zero:N \l_cube_tmpa_int
@@ -57,13 +58,14 @@
     \end{scope}
 }
 
+\exp_args_generate:n {oonn}
 % 魔方绘制函数：绘制三面视图的魔方
 % 接收三个字符串参数和一个可选的尺寸参数
 % 第一个参数：正面五个字符（ABCDE -> ABCDbbEbb）
 % 第二个参数：右侧面五个字符（ABCDE -> CDEBrrArr）
 % 第三个参数：顶面九个字符（直接使用原参数）
-% 第四个参数：尺寸参数（可选，默认3mm）
-\NewDocumentCommand \Cube { m m m O{3mm} } {
+% 第四个参数：尺寸参数（可选，默认5mm）
+\NewDocumentCommand \Cube { m m m O{5mm} } {
     % 扩展正面参数：ABCDE -> ABCDbbEbb
     \int_case:nn {\str_count:n {#1}} {
         {5} {
@@ -100,21 +102,7 @@
             }
     }
 
-    % 绘制三面视图
-    \begin{scope}[x=#4, y=#4]
-        % 绘制正面
-        \exp_args:NnV \drawsquares{ x=0.75*#4, y=#4, yslant=-0.5 }{\l_cube_front_expanded}
-
-        % 绘制右侧面（带倾斜效果）
-        \begin{scope}[xshift=2.25*#4,yshift=-1.12*#4]
-            \exp_args:NnV \drawsquares{ x=0.7*#4, y=#4, yslant=0.5 }{\l_cube_right_expanded}
-        \end{scope}
-
-        % 绘制顶面（带倾斜效果）
-        \begin{scope}[yshift=3*#4]
-            \drawsquares{ x=1.5*#4, y=0.35*#4, xslant=2, yslant=-0.25 }{#3}
-        \end{scope}
-    \end{scope}
+    \exp_args:Noonn \drawcube{\l_cube_front_expanded}{\l_cube_right_expanded}{#3}{#4}
 }
 
 % F2L 宏：用于绘制第一二层公式
@@ -182,15 +170,27 @@
     \vspace{3pt}
     \TypesetCoffin \l_cube_coffin_output
     \vspace{3pt}
-    % \par
-
-    % % 获取缩放后的实际高度并存储
-    % \setlength{\gfflheight}{\CoffinTotalHeight\l_cube_coffin_output}
-    % \addtolength{\gfflheight}{6pt}  % 额外增加垂直间距
-    % \setlength{\gfflwidth} {\CoffinWidth\l_cube_coffin_output}
 }
 
 \ExplSyntaxOff
+
+% 魔方绘制函数：绘制三面视图的魔方
+\NewDocumentCommand{\drawcube}{ m m m m }{
+    \begin{scope}[
+        x={(340:0.8*#4)},  % 从330改为345，更接近水平
+        y={( 90:  1*#4)},
+        z={(200:0.8*#4)}   % 从210改为195，更接近水平
+    ]
+        % 绘制正面
+        \drawsquares{canvas is xy plane at z=0}{#1}
+
+        % 绘制右侧面（带倾斜效果）
+        \drawsquares{canvas is yz plane at x=3, rotate=-90}{#2}
+
+        % 绘制顶面（带倾斜效果）
+        \drawsquares{canvas is zx plane at y=3, rotate= 90}{#3}
+    \end{scope}
+}
 
 % 在文档开始后自动测量第一个FTwoL的高度和宽度
 \AtBeginDocument{
