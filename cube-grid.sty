@@ -193,9 +193,10 @@
 \ExplSyntaxOff
 
 % 在文档开始后自动测量第一个FTwoL的高度和宽度
-\AtEndPreamble{\usepackage{tcolorbox}\tcbuselibrary{skins}}
 \AtBeginDocument{
-\setbox0=\hbox{\begin{tcolorbox}[blankest]\FTwoL{-----}{-----}{---------}{(RUR')}\end{tcolorbox}}
-\setlength{\gfflheight}{\ht0}
-\setlength{\gfflwidth} {\wd0}
+\setbox0=\hbox{\mbox{\FTwoL{-----}{-----}{---------}{(RUR')}}}
+\setlength{\gfflwidth} {\wd0}  % 获取宽度
+\setlength{\gfflheight}{\ht0}  % 获取高度
+\addtolength{\gfflheight}{\dp0}  % 加上深度
+\addtolength{\gfflheight}{6pt}  % 额外增加垂直间距
 }
