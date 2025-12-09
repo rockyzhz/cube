@@ -28,7 +28,7 @@
     {{-b--b}{r----}{-------r-}{(UR\blue{U'}R'\blue{U'})\\y'(R'UR)}}, % 2
     {{----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}}, % 3
     {{---bw}{br---}{---------}{(RUR'\blue{U'})\\(RU2R'\blue{U'})\\(RUR')}}, % 4
-    {{---rw}{bb---}{---------}{(RF)U\\(R\blue{U'}R'\red{F'})(\blue{U'}R')\\或者\\(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'\blue{U})\\y'R'\blue{U'}R}}, % 5
+    {{---rw}{bb---}{---------}{(RF)U\\(R\blue{U'}R'\red{F'})(\blue{U'}R')\\或者\\(R\blue{U'}R'\blue{U'})(R\blue{U'}R'\blue{U})\\y'R'\blue{U'}R}}, % 5
     {{-b--w}{b----}{-------r-}{y'(R'\blue{U'}RU)\\(R'\blue{U'}R)}}, % 6
     {{----w}{b--r-}{-----b---}{(R\blue{U'}R'U)\\(R\blue{U'}R')}}, % 7
     {{---br}{wr---}{---------}{(R\blue{U'}R'U)\\(R\red{U'}\blue{U'}R'U)\\(R\blue{U'}R')}}, % 8
@@ -78,17 +78,6 @@
 
 % 关闭LaTeX3语法以正确解析tcolorbox键名
 \ExplSyntaxOff
-
-% % ==================== 预先测量高度 ====================
-% % 先用第一个公式来实际测量高度，初始化\gfflheight
-% \newsavebox{\gfflmeasurebox}
-% \sbox{\gfflmeasurebox}{
-%     \begin{tcolorbox}[blankest]
-%         \FTwoL{-----}{-----}{---------}{(RUR')}
-%     \end{tcolorbox}
-% }
-% \the\gfflheight
-% \the\ht\gfflmeasurebox
 
 % ==================== 第1步：一次性生成并自动分页储存 ====================
 % 使用实际测量的高度：41个公式，每11个一页，最后一个页面8个公式

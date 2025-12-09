@@ -53,11 +53,24 @@
 \subsection*{自定义尺寸（3cm）}
 
 \noindent
-\begin{tikzpicture}  
-\Cube{-brw-}{-brw-}{-brw-br-b}[3cm]
-% \Cube{-brw-}{-brw-}{-brw-br-b}[5mm]
-% \drawcube{---bbrbbb}{---rrrbrr}{---------}{3cm}
+% \ExplSyntaxOn
+% % 生成 canvas 参数并存入 tl 变量
+% \gen_cube_plane_tl:Nnnn \l_tmpa_tl {xy} {z} {-0.5}
+% % 构建完整的 tikzset 命令并执行
+% \tl_set:Nx \l_tmpb_tl {cube_plane/.style={\tl_use:N \l_tmpa_tl}}
+% \exp_args:NV \tikzset \l_tmpb_tl
+% \ExplSyntaxOff
+\begin{tikzpicture}
+\Cube{123456789}{123456789}{123456789}[3cm]
+% \draw [ cube_plane,
+%         rotate around={-90:(1.5,1.5)},
+%         -{Stealth[length=1cm]},
+%         red,
+%         line width=3pt]
+% (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
+% \ExplSyntaxOn
 \end{tikzpicture}
+% \ExplSyntaxOff
 % \begin{tikzpicture}  
 % % \Cube{-brw-}{-brw-}{-brw-br-b}[3cm]
 % % \Cube{-brw-}{-brw-}{-brw-br-b}[5mm]
