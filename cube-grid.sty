@@ -9,6 +9,7 @@
 % \RequirePackage{pgfkeys}
 \RequirePackage{xcoffins}
 \RequirePackage{expl3}
+\RequirePackage{l3regex-supplement}
 \RequirePackage{etoolbox}
 \RequirePackage{xparse}
 % \RequirePackage{tcolorbox}
@@ -97,7 +98,6 @@
     \end{scope}
 }
 
-% 使 drawcube 函数支持可选参数
 \exp_args_generate:n {oonnn}
 
 % 魔方绘制函数：绘制三面视图的魔方
@@ -214,32 +214,55 @@
 }
 
 % \tl_new:N \l_cube_notationa_tl % 存储绘图命令
-% \seq_new:N \l_cube_notation_seq % 存储多条绘图命令
-% \tl_new:N \l_cube_notationb_tl % 存储绘图参数
-% \bool_new:N \l_cube_notation_bool % 顺时针为真，逆时针为假
-% \int_new:N \l_cube_notation_int % 旋转层数
-% \NewDocumentCommand{\CubeNotation}{m O{1cm} }{
-%     \tl_clear:N \l_cube_notationa_tl
-%     \tl_clear:N \l_cube_notationb_tl
-%     \bool_set_false:N \l_cube_notation_bool
-%     \regex_match_case:nn
-%         {
-%             { [A-Z] } {\int_set:Nn \l_cube_notation_int {1}} % 大写字母表示旋转一层
-%             { [a-w] } {\int_set:Nn \l_cube_notation_int {2}} % 小写字母表示旋转两层
-%             { [x-z] } {\int_set:Nn \l_cube_notation_int {3}} % x,y,z表示旋转三层
-%             { [RrUuFfSxyz]} {\bool_set_true:N \l_cube_notation_bool} % 顺时针旋转
-%             { ['] } {\bool_set_inverse:N \l_cube_notation_bool} % 旋转方向逆转
-%             { [rR] } { \tl_put_right:Nn \l_cube_notationa_tl
-%                         {
-%                             \tl_put_right:Nn \l_cube_notationb_tl { {Stealth[length=.5*#2]} }
-%                             \regex_match:nnTF { r } {##1}
-%                                 { \tl_put_right:Nn \l_cube_notationb_tl { } }
-%                             \draw [canvas is yz plane at x=2.5, rotate=-90, red]
-%                         } 
-%                      }
-%         }
-%         {#1}
-% }
+\seq_new:N \l_cube_notationa_seq % 存储多条绘图命令
+\tl_new:N \l_cube_notationa_tl % 存储绘图参数
+\tl_new:N \l_cube_notationb_tl % 存储绘图参数
+\tl_new:N \l_cube_notationc_tl % 存储绘图参数
+\tl_new:N \l_cube_notationd_tl % 临时存储由 \l_cube_notation_clist 拆解出来的每一个层数
+\seq_new:N \l_cube_notationb_seq % 存储多个绘图参数
+\bool_new:N \l_cube_notation_bool % 顺时针为真，逆时针为假
+\clist_new:N \l_cube_notation_clist % 旋转层数列表
+\NewDocumentCommand{\CubeNotation}{ m O{3cm} }{
+    \tl_clear:N \l_cube_notationa_tl
+    \tl_clear:N \l_cube_notationb_tl
+    \tl_clear:N \l_cube_notationc_tl
+    \tl_clear:N \l_cube_notationd_tl
+    \seq_clear:N \l_cube_notationa_seq
+    \seq_clear:N \l_cube_notationb_seq
+    \bool_set_false:N \l_cube_notation_bool
+    \regex_match_case_all:nn
+        {
+            { [LDF] } {\clist_set:Nn \l_cube_notation_clist {1}} % 表示旋转所在方向第一层
+            { [SME] } {\clist_set:Nn \l_cube_notation_clist {2}} % 表示旋转所在方向第两层
+            { [RUB] } {\clist_set:Nn \l_cube_notation_clist {3}} % 表示旋转所在方向第三层
+            { [ldf] } {\clist_set:Nn \l_cube_notation_clist {1,2}} % 表示旋转所在方向前两层
+            { [rub] } {\clist_set:Nn \l_cube_notation_clist {2,3}} % 表示旋转所在方向后两层
+            { [xyz] } {\clist_set:Nn \l_cube_notation_clist {1,2,3}} % 表示在该方向旋转所有层
+            { [RrUuFfSxyz]} {\bool_set_true:N \l_cube_notation_bool} % 顺时针旋转
+            { ['] } {\bool_set_inverse:N \l_cube_notation_bool} % 逆转旋转方向
+            { [rRLlMx] } {\tl_put_right:Nn \l_cube_notationc_tl   {yz~plane}}
+            { [uUDdEy] } {\tl_put_right:Nn \l_cube_notationc_tl   {zx~plane}}
+            { [fFBbSz] } {\tl_put_right:Nn \l_cube_notationc_tl   {xy~plane}}
+        }
+        {#1}
+    \bool_if:NTF \l_cube_notation_bool
+        { \tl_put_right:Nn \l_cube_notationa_tl   {     clockwise} }
+        { \tl_put_right:Nn \l_cube_notationa_tl   { anticlockwise} }
+    \clist_map_variable:NNn \l_cube_notation_clist \l_cube_notationd_tl {
+        \seq_put_right:Ne \l_cube_notationa_seq {
+            \exp_not:N\draw [ \l_cube_notationa_tl={#2}, \l_cube_notationc_tl={\l_cube_notationd_tl} ]
+                (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
+        }
+    }
+
+    \seq_log:N \l_cube_notationa_seq
+    \drawcube
+        {---------}
+        {---------}
+        {---------}
+        {#2}
+        {\seq_use:Nn \l_cube_notationa_seq {}}
+}
 
 % \gen_cube_plane_tl:Nnn \l_tmpa_tl {xy} {z=-0.5}
 
@@ -259,10 +282,6 @@
 
         % 其它的绘图语句（如边框等）可以在这里添加
         #5
-
-        % 示例：绘制一个顺时针箭头
-        \draw [zx plane={2}, clockwise={#4}]
-            (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
     \end{scope}
 }
 
