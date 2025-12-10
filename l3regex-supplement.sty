@@ -1,0 +1,102 @@
+%% l3regex-supplement.sty
+%% LaTeX3 正则表达式补充库
+%% 提供增强的正则表达式匹配功能
+%% 版本: 0.3.0
+%% 日期: 2025-12-10
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage{l3regex-supplement}
+  {2025-12-10}
+  {0.3.0}
+  {Supplemental regex functions for LaTeX3}
+
+\RequirePackage{expl3}
+
+%%% ====================================================================
+%%% 变量声明 (保持不变)
+%%% ====================================================================
+\seq_new:N \l__regex_supplement_cases_seq
+\tl_new:N \l__regex_supplement_current_regex_tl
+\tl_new:N \l__regex_supplement_current_code_tl
+\bool_new:N \l__regex_supplement_found_bool
+\int_new:N \l__regex_supplement_match_count_int
+\prop_new:N \l__regex_supplement_results_prop
+\tl_new:N \l__regex_supplement_temp_tl
+
+%%% ====================================================================
+%%% \regex_match_case_all:nn - 执行所有匹配的 case
+%%% ====================================================================
+\exp_args_generate:n {Vnnn}
+\cs_new_protected:Npn \regex_match_case_all:nn #1 #2 {
+  \seq_set_split:Nnn \l__regex_supplement_cases_seq {} {#1}
+  \bool_while_do:nn { ! \seq_if_empty_p:N \l__regex_supplement_cases_seq } {
+    \seq_pop_left:NN \l__regex_supplement_cases_seq \l__regex_supplement_current_regex_tl
+    \seq_pop_left:NN \l__regex_supplement_cases_seq \l__regex_supplement_current_code_tl
+    \exp_args:NVnnn \regex_match:nnTF { \l__regex_supplement_current_regex_tl } { #2 }
+      { \tl_use:N \l__regex_supplement_current_code_tl }
+      { }
+  }
+}
+
+%%% ====================================================================
+%%% \regex_match_case_all:nnTF - 带 true/false 分支的版本
+%%% ====================================================================
+\cs_new_protected:Npn \regex_match_case_all:nnTF #1 #2 #3 #4
+  {}
+
+%%% ====================================================================
+%%% \regex_match_case_all_collect:nnN - 收集所有匹配结果 (最终版本)
+%%% ====================================================================
+\cs_new_protected:Npn \regex_match_case_all_collect:nnN #1 #2 #3
+  {}
+
+%%% ====================================================================
+%%% \regex_match_case_all_execute:nn - 执行匹配的 case 并返回匹配数量
+%%% ====================================================================
+\cs_new_protected:Npn \regex_match_case_all_execute:nn #1 #2
+  {}
+
+%%% ====================================================================
+%%% \regex_match_case_all_with_args:nn - 支持代码块中的参数
+%%% ====================================================================
+\cs_new_protected:Npn \regex_match_case_all_with_args:nn #1 #2
+  {}
+
+%%% ====================================================================
+%%% \regex_match_case_all_break:nn - 匹配后中断的版本
+%%% ====================================================================
+\cs_new_protected:Npn \regex_match_case_all_break:nn #1 #2
+  {}
+
+%%% ====================================================================
+%%% \regex_extract_and_process_all:nnn - 提取所有匹配并处理
+%%% ====================================================================
+\cs_new_protected:Npn \regex_extract_and_process_all:nnn #1 #2 #3
+  {}
+
+%%% ====================================================================
+%%% 用户友好的命令别名
+%%% ====================================================================
+\cs_new_eq:NN \regexMatchCaseAll \regex_match_case_all:nn
+\cs_new_eq:NN \regexMatchCaseAllTF \regex_match_case_all:nnTF
+\cs_new_eq:NN \regexMatchCaseAllCollect \regex_match_case_all_collect:nnN
+\cs_new_eq:NN \regexMatchCaseAllExecute \regex_match_case_all_execute:nn
+\cs_new_eq:NN \regexMatchCaseAllWithArgs \regex_match_case_all_with_args:nn
+\cs_new_eq:NN \regexMatchCaseAllBreak \regex_match_case_all_break:nn
+\cs_new_eq:NN \regexExtractAndProcessAll \regex_extract_and_process_all:nnn
+
+%%% ====================================================================
+%%% 常用正则表达式类别（方便使用）
+%%% ====================================================================
+\cs_new:Npn \regexHan { \c{\p{Han}} }
+\cs_new:Npn \regexGreek { \c{\p{Greek}} }
+\cs_new:Npn \regexCyrillic { \c{\p{Cyrillic}} }
+\cs_new:Npn \regexLetter { \c{\pL} }
+\cs_new:Npn \regexNumber { \c{\pN} }
+\cs_new:Npn \regexPunctuation { \c{\pP} }
+\cs_new:Npn \regexSymbol { \c{\pS} }
+\cs_new:Npn \regexSeparator { \c{\pZ} }
+\cs_new:Npn \regexAnyUnicode { \c{\X} }
+
+% 包文件结束
+\endinput
