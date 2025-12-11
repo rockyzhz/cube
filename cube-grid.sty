@@ -40,12 +40,14 @@
 \str_new:N \l_cube_front_expanded
 \str_new:N \l_cube_right_expanded
 
+% 定义颜色
+\definecolor{niceblue}{RGB}{58, 93, 132}
 % 定义颜色映射
 \prop_new:N \g_cube_color_map_prop
 \prop_gput:Nnn \g_cube_color_map_prop {-} {black!30}
 \prop_gput:Nnn \g_cube_color_map_prop {=} {black!60}
 \prop_gput:Nnn \g_cube_color_map_prop {g} {black!30}
-\prop_gput:Nnn \g_cube_color_map_prop {b} {blue}
+\prop_gput:Nnn \g_cube_color_map_prop {b} {niceblue}
 \prop_gput:Nnn \g_cube_color_map_prop {r} {red}
 \prop_gput:Nnn \g_cube_color_map_prop {w} {white}
 \prop_gput:Nnn \g_cube_color_map_prop {y} {yellow!80!orange!90!black}
@@ -55,36 +57,55 @@
 \NewDocumentCommand \drawsquares { m m } {
     \begin{scope}[#1]
         \regex_match:nnTF
-            { [1-9] }
+            { [UDLR] }
             {#2}
-            {
-                \bool_set_true:N \l_tmpa_bool % 包含数字
-            }
-            {
-                \bool_set_false:N \l_tmpa_bool % 不包含数字
-            }
+            {\bool_set_true:N  \l_tmpa_bool} % '-'   代表蓝色
+            {\bool_set_false:N \l_tmpa_bool} % '-' 不代表蓝色
 
         \int_zero:N \l_cube_tmpa_int
 
         % 按行优先顺序排列（第一行，然后第二行，最后第三行）
         \str_map_inline:nn {#2} {
-            \int_incr:N \l_cube_tmpa_int
+            \bool_if:NTF \l_tmpa_bool
+                {\str_set:Nn \l_tmpa_str {-}} % 把 UDLR 模式下所有格子背景置为默认灰色
+                {}
+
+                \int_incr:N \l_cube_tmpa_int
 
             % 计算行和列（从0开始）
             \int_set:Nn \l_cube_tmpb_int {\int_div_truncate:nn {\l_cube_tmpa_int - 1} {3}}  % 行号 (0,1,2)
             \int_set:Nn \l_cube_tmpc_int {\int_mod:nn {\l_cube_tmpa_int - 1} {3}}           % 列号 (0,1,2)
 
-            \regex_match:nnTF
-                { [1-9] }
-                {##1}
-                {
-                    \str_set:Nn \l_tmpa_str {-} % 是数字，背景为灰色
-                    \str_set:Nn \l_tmpb_str {##1} % 包含数字，直接使用
-                }
-                {
-                    \str_set:Nn \l_tmpa_str {##1} % 不是数字，使用原字符代表的颜色
-                    \str_set:Nn \l_tmpb_str {} % 不包含数字，置为空
-                }
+            % \regex_match:nnTF
+            %     { [1-9] }
+            %     {##1}
+            %     {
+            %         \str_set:Nn \l_tmpa_str {-} % 是数字，背景为灰色
+            %         \str_set:Nn \l_tmpb_str {##1} % 包含数字，直接使用
+            %     }
+            %     {
+            %         \str_set:Nn \l_tmpa_str {##1} % 不是数字，使用原字符代表的颜色
+            %         \str_set:Nn \l_tmpb_str {} % 不包含数字，置为空
+            %     }
+
+            \regex_match_case:nn
+            {
+                { [1-9] }{
+                            \str_set:Nn \l_tmpa_str {-} % 是数字，背景为灰色
+                            \str_set:Nn \l_tmpb_str {##1} % 包含数字，直接使用
+                        }
+                { [a-z-=] }{
+                            \bool_if:NTF \l_tmpa_bool % 判断是否画 OLL 步骤的示意图
+                                {\str_set:Nn \l_tmpa_str {b}} % 是则把 '-' 代表蓝色背景
+                                {\str_set:Nn \l_tmpa_str {##1}} % 不是则，使用原字符代表的颜色
+                            \str_set:Nn \l_tmpb_str {} % 内容置为空
+                        }
+                { [U] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int + 1.1) -- +(0.9,0);}
+                { [D] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int - 0.1) -- +(0.9,0);}
+                { [L] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int - 0.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
+                { [R] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int + 1.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
+            }
+            {##1}
 
             % 获取颜色
             % \bool_if:NTF \l_tmpa_bool {\str_set:Nn \l_tmpa_str {-}} {\str_set:Nn \l_tmpa_str {##1}}
@@ -92,7 +113,7 @@
 
             % 绘制正方形（1cm边长，填充对应颜色，白色描边，2pt线宽）
             % 注意：Y坐标需要反转（第一行在顶部）
-            \fill[\l_cube_tmpd_tl, draw=white, line~width=\pgflinewidth]
+            \fill[\l_cube_tmpd_tl, draw=black!10, line~width=2\pgflinewidth]
                 (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, scale=2, pos=0.5] {\str_use:N \l_tmpb_str};
         }
     \end{scope}
