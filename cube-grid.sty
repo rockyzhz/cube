@@ -42,9 +42,9 @@
 
 % 定义颜色映射
 \prop_new:N \g_cube_color_map_prop
-\prop_gput:Nnn \g_cube_color_map_prop {-} {gray}
-\prop_gput:Nnn \g_cube_color_map_prop {=} {black!80}
-\prop_gput:Nnn \g_cube_color_map_prop {g} {gray}
+\prop_gput:Nnn \g_cube_color_map_prop {-} {black!30}
+\prop_gput:Nnn \g_cube_color_map_prop {=} {black!60}
+\prop_gput:Nnn \g_cube_color_map_prop {g} {black!30}
 \prop_gput:Nnn \g_cube_color_map_prop {b} {blue}
 \prop_gput:Nnn \g_cube_color_map_prop {r} {red}
 \prop_gput:Nnn \g_cube_color_map_prop {w} {white}
@@ -99,6 +99,8 @@
 }
 
 \exp_args_generate:n {oonnn}
+\exp_args_generate:n {ooono}
+\exp_args_generate:n {Nen}
 
 % 魔方绘制函数：绘制三面视图的魔方
 % 接收三个字符串参数和一个可选的尺寸参数
@@ -213,7 +215,19 @@
     \vspace{3pt}
 }
 
-% \tl_new:N \l_cube_notationa_tl % 存储绘图命令
+\cs_new:Npn \str_replace_char_tl:Nnn #1 #2 #3 {
+  % 将字符串转换为token list，然后替换
+  \tl_clear:N \l_tmpa_tl
+  \tl_clear:N \l_tmpb_tl
+  \exp_args:NNe \tl_set:Nn \l_tmpa_tl { #1 }
+  \tl_set:Nn \l_tmpb_tl {
+    \tl_range:Nnn \l_tmpa_tl { 1 } { #2 - 1 }
+    #3
+    \tl_range:Nnn \l_tmpa_tl { #2 + 1 } { -1 }
+  }
+  \str_set:Ne #1 { \l_tmpb_tl }
+}
+
 \seq_new:N \l_cube_notationa_seq % 存储多条绘图命令
 \tl_new:N \l_cube_notationa_tl % 存储绘图参数
 \tl_new:N \l_cube_notationb_tl % 存储绘图参数
@@ -222,7 +236,12 @@
 \seq_new:N \l_cube_notationb_seq % 存储多个绘图参数
 \bool_new:N \l_cube_notation_bool % 顺时针为真，逆时针为假
 \clist_new:N \l_cube_notation_clist % 旋转层数列表
-\NewDocumentCommand{\CubeNotation}{ m O{3cm} }{
+\fp_new:N \l_cube_font_scale_fp % 字体放大比例
+\dim_new:N \l_cube_unit_dim % 单位长度
+\str_new:N \l_cube_notation_front_str % 正面颜色字符串
+\str_new:N \l_cube_notation_right_str % 右面颜色字符串
+\str_new:N \l_cube_notation_top_str % 顶面颜色字符串
+\NewDocumentCommand{\CubeNotation}{ m O{5mm} }{
     \tl_clear:N \l_cube_notationa_tl
     \tl_clear:N \l_cube_notationb_tl
     \tl_clear:N \l_cube_notationc_tl
@@ -230,6 +249,12 @@
     \seq_clear:N \l_cube_notationa_seq
     \seq_clear:N \l_cube_notationb_seq
     \bool_set_false:N \l_cube_notation_bool
+    \clist_clear:N \l_cube_notation_clist
+    \str_set:Nn \l_cube_notation_front_str {---------} % 默认正面颜色均为灰色
+    \str_set:Nn \l_cube_notation_right_str {---------} % 默认右面颜色均为灰色
+    \str_set:Nn \l_cube_notation_top_str   {---------} % 默认顶面颜色均为灰色
+    \l_cube_unit_dim=#2\relax
+    \pgfmathsetmacro{\scaleFactor}{\l_cube_unit_dim/3mm}
     \regex_match_case_all:nn
         {
             { [LDF] } {\clist_set:Nn \l_cube_notation_clist {1}} % 表示旋转所在方向第一层
@@ -240,9 +265,46 @@
             { [xyz] } {\clist_set:Nn \l_cube_notation_clist {1,2,3}} % 表示在该方向旋转所有层
             { [RrUuFfSxyz]} {\bool_set_true:N \l_cube_notation_bool} % 顺时针旋转
             { ['] } {\bool_set_inverse:N \l_cube_notation_bool} % 逆转旋转方向
-            { [rRLlMx] } {\tl_put_right:Nn \l_cube_notationc_tl   {yz~plane}}
-            { [uUDdEy] } {\tl_put_right:Nn \l_cube_notationc_tl   {zx~plane}}
-            { [fFBbSz] } {\tl_put_right:Nn \l_cube_notationc_tl   {xy~plane}}
+            { [2] } {\seq_put_right:Ne \l_cube_notationa_seq {
+                            \exp_not:N\node[orange,scale=\scaleFactor,fill=white,inner~sep=1pt] at (4,2) {$\times2$};
+                        }
+                    }
+            { [rRLlMx] } { % 旋转所在平面为 yz 平面
+                            \tl_put_right:Nn \l_cube_notationc_tl {yz~plane}
+                            \clist_if_in:NnTF \l_cube_notation_clist {3}
+                                {\str_set:Nn \l_cube_notation_right_str {=========}} % 右侧面颜色变为深灰色
+                                {}
+                            \clist_map_variable:NNn \l_cube_notation_clist \l_cube_notationd_tl {
+                                \int_step_inline:nn {3} {
+                                    \exp_args:NNen\str_replace_char_tl:Nnn \l_cube_notation_front_str {\int_eval:n {##1*3+\l_cube_notationd_tl-3}} {=}
+                                    \exp_args:NNen\str_replace_char_tl:Nnn \l_cube_notation_top_str   {\int_eval:n {##1*3+\l_cube_notationd_tl-3}} {=}
+                                }
+                            }
+                         }
+            { [uUDdEy] } { % 旋转所在平面为 zx 平面
+                            \tl_put_right:Nn \l_cube_notationc_tl {zx~plane}
+                            \clist_if_in:NnTF \l_cube_notation_clist {3}
+                                {\str_set:Nn \l_cube_notation_top_str {=========}} % 顶面颜色变为深灰色
+                                {}
+                            \clist_map_variable:NNn \l_cube_notation_clist \l_cube_notationd_tl {
+                                \int_step_inline:nn {3} {
+                                    \exp_args:NNen\str_replace_char_tl:Nnn \l_cube_notation_front_str {\int_eval:n {9+##1-3*\l_cube_notationd_tl}} {=}
+                                    \exp_args:NNen\str_replace_char_tl:Nnn \l_cube_notation_right_str {\int_eval:n {9+##1-3*\l_cube_notationd_tl}} {=}
+                                }
+                            }
+                         }
+            { [fFBbSz] } { % 旋转所在平面为 xy 平面
+                            \tl_put_right:Nn \l_cube_notationc_tl {xy~plane}
+                            \clist_if_in:NnTF \l_cube_notation_clist {1}
+                                {\str_set:Nn \l_cube_notation_front_str {=========}} % 正面颜色变为深灰色
+                                {}
+                            \clist_map_variable:NNn \l_cube_notation_clist \l_cube_notationd_tl {
+                                \int_step_inline:nn {3} {
+                                    \exp_args:NNen\str_replace_char_tl:Nnn \l_cube_notation_top_str     {\int_eval:n {9+##1-3*\l_cube_notationd_tl}} {=}
+                                    \exp_args:NNen\str_replace_char_tl:Nnn \l_cube_notation_right_str   {\int_eval:n {##1*3+\l_cube_notationd_tl-3}} {=}
+                                }
+                            }
+                         }
         }
         {#1}
     \bool_if:NTF \l_cube_notation_bool
@@ -255,11 +317,17 @@
         }
     }
 
-    \seq_log:N \l_cube_notationa_seq
+    \seq_put_right:Ne \l_cube_notationa_seq {
+        \exp_not:N\node[node~font=\exp_not:N\tt,scale=\scaleFactor] at (3,-1.5,0) {#1};
+        \exp_not:N\useasboundingbox (-0.5,-2.5) (6.5,5.5);
+    }
+
+    \seq_log:N\l_cube_notationa_seq
+    \exp_args:Nooono
     \drawcube
-        {---------}
-        {---------}
-        {---------}
+        {\l_cube_notation_front_str}
+        {\l_cube_notation_right_str}
+        {\l_cube_notation_top_str}
         {#2}
         {\seq_use:Nn \l_cube_notationa_seq {}}
 }

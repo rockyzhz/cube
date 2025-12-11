@@ -52,25 +52,47 @@
 
 \subsection*{自定义尺寸（3cm）}
 
-\noindent
+% \noindent
 % \ExplSyntaxOn
-% % 生成 canvas 参数并存入 tl 变量
-% \gen_cube_plane_tl:Nnnn \l_tmpa_tl {xy} {z} {-0.5}
-% % 构建完整的 tikzset 命令并执行
-% \tl_set:Nx \l_tmpb_tl {cube_plane/.style={\tl_use:N \l_tmpa_tl}}
-% \exp_args:NV \tikzset \l_tmpb_tl
+% \str_new:N \g_cube_notation_front_str
+% \str_set:Nn \g_cube_notation_front_str {---------}
+% \int_new:N \g_cube_notation_front_int
+% \clist_new:N \g_cube_notation_clist
+% \clist_set:Nn \g_cube_notation_clist {2,3}
+% \clist_map_variable:NNn \g_cube_notation_clist \g_cube_notation_front_int {
+%     \int_step_inline:nn {3} {
+%         \exp_args:NNen\str_replace_char_tl:Nnn \g_cube_notation_front_str {\int_eval:n{#1*3+\g_cube_notation_front_int-3}} {=}
+%     }
+% }
+% \str_use:N \g_cube_notation_front_str
+% \str_log:N \g_cube_notation_front_str
+% % % 生成 canvas 参数并存入 tl 变量
+% % \gen_cube_plane_tl:Nnnn \l_tmpa_tl {xy} {z} {-0.5}
+% % % 构建完整的 tikzset 命令并执行
+% % \tl_set:Nx \l_tmpb_tl {cube_plane/.style={\tl_use:N \l_tmpa_tl}}
+% % \exp_args:NV \tikzset \l_tmpb_tl
 % \ExplSyntaxOff
-\begin{tikzpicture}
-  \CubeNotation{z'}
-% \Cube{123456789}{123456789}{123456789}[3cm]
-% \draw [ cube_plane,
-%         rotate around={-90:(1.5,1.5)},
-%         -{Stealth[length=1cm]},
-%         red,
-%         line width=3pt]
-% (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
-% \ExplSyntaxOn
-\end{tikzpicture}
+\ExplSyntaxOn
+% \exp_args_generate:n {NnN}
+\clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
+{
+  \begin{tikzpicture}
+    \exp_args:No\CubeNotation{\l_tmpa_tl}[3mm]
+  \end{tikzpicture}
+  \par
+}
+\ExplSyntaxOff
+% \begin{tikzpicture}
+%   \CubeNotation{z2}[1cm]
+% % \Cube{123456789}{123456789}{123456789}[3cm]
+% % \draw [ cube_plane,
+% %         rotate around={-90:(1.5,1.5)},
+% %         -{Stealth[length=1cm]},
+% %         red,
+% %         line width=3pt]
+% % (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
+% % \ExplSyntaxOn
+% \end{tikzpicture}
 % \ExplSyntaxOff
 % \begin{tikzpicture}  
 % % \Cube{-brw-}{-brw-}{-brw-br-b}[3cm]
