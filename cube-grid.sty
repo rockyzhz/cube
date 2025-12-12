@@ -1,3 +1,4 @@
+% region 开头
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{cube-grid}[2025/12/04 Cube Grid Drawing Library]
 
@@ -6,18 +7,19 @@
 \usetikzlibrary{calc}
 \usetikzlibrary{math}
 \usetikzlibrary{arrows.meta}
-% \RequirePackage{pgfkeys}
 \RequirePackage{xcoffins}
 \RequirePackage{expl3}
 \RequirePackage{l3regex-supplement}
-\RequirePackage{etoolbox}
 \RequirePackage{xparse}
-% \RequirePackage{tcolorbox}
-% \tcbuselibrary{skins}
 
+% endregion
+
+% region 自定义命令
 \ProvideDocumentCommand{\red}{m}{\textcolor{red}{#1}}
 \ProvideDocumentCommand{\blue}{m}{\textcolor{blue}{#1}}
+% endregion
 
+% region tikz 设置
 \tikzset{3d cube/.style={
     x={(340:0.8*#1)},  % 从330改为345，更接近水平
     y={( 90:  1*#1)},
@@ -27,66 +29,78 @@
     xy plane/.style={canvas is xy plane at z=-#1+0.5,rotate around={-90:(1.5,1.5)}},
     zx plane/.style={canvas is zx plane at y=#1-0.5,rotate=90,rotate around={180:(1.5,1.5)}},
     yz plane/.style={canvas is yz plane at x=#1-0.5,rotate=-90},
-    clockwise/.style={-{Stealth[length=0.5*#1]},red,line width=.1*#1},
-    anticlockwise/.style={{Stealth[length=0.5*#1]}-,red,line width=.1*#1},
+    clockwise/.style={-{Stealth[length=0.8*#1]},red,line width=.1*#1},
+    anticlockwise/.style={{Stealth[length=0.8*#1]}-,red,line width=.1*#1},
+    rotatearound/.style={rotate around={#1:(1.5,1.5)}},
 }
+% endregion 
 
 \ExplSyntaxOn
 
+% region 展开函数自定义变种
+\exp_args_generate:n {oonnn}
+\exp_args_generate:n {ooono}
+\exp_args_generate:n {ennn}
+\exp_args_generate:n {Nen}
+% endregion
+
+% region 定义颜色
+\definecolor{niceblue}{RGB}{17, 68, 99} % {58, 93, 132}
+\definecolor{nicered} {RGB}{235, 51, 36}
+
+% 定义颜色映射
+\prop_new:N \g_cube_color_map_prop
+\prop_gput:Nnn \g_cube_color_map_prop {-} {black!30}
+\prop_gput:Nnn \g_cube_color_map_prop {=} {black!65}
+\prop_gput:Nnn \g_cube_color_map_prop {g} {black!30}
+\prop_gput:Nnn \g_cube_color_map_prop {b} {niceblue} % {blue}
+\prop_gput:Nnn \g_cube_color_map_prop {l} {niceblue} % l 表示 lan  色
+\prop_gput:Nnn \g_cube_color_map_prop {r} {nicered}  % {red}
+\prop_gput:Nnn \g_cube_color_map_prop {h} {nicered}  % h 表示 hong 色
+\prop_gput:Nnn \g_cube_color_map_prop {w} {white}
+\prop_gput:Nnn \g_cube_color_map_prop {y} {yellow!80!orange!90!black}
+% endregion
+
+% region \drawsquares 函数定义
 \int_new:N \l_cube_tmpc_int
 \int_new:N \l_cube_tmpb_int
 \int_new:N \l_cube_tmpa_int
+\bool_new:N \l_cube_udlr_bool
+\bool_new:N \l_cube_num_bool
+\dim_new:N \l_cube_linewidth_dim
 \tl_new:N \l_cube_tmpd_tl
 \str_new:N \l_cube_front_expanded
 \str_new:N \l_cube_right_expanded
 
-% 定义颜色
-\definecolor{niceblue}{RGB}{58, 93, 132}
-% 定义颜色映射
-\prop_new:N \g_cube_color_map_prop
-\prop_gput:Nnn \g_cube_color_map_prop {-} {black!30}
-\prop_gput:Nnn \g_cube_color_map_prop {=} {black!60}
-\prop_gput:Nnn \g_cube_color_map_prop {g} {black!30}
-\prop_gput:Nnn \g_cube_color_map_prop {b} {niceblue}
-\prop_gput:Nnn \g_cube_color_map_prop {r} {red}
-\prop_gput:Nnn \g_cube_color_map_prop {w} {white}
-\prop_gput:Nnn \g_cube_color_map_prop {y} {yellow!80!orange!90!black}
-
 % 主函数：根据字符串绘制彩色正方形（九宫格排列）
 % 使用 scope 环境，可以嵌套在其他 tikz 环境中
-\NewDocumentCommand \drawsquares { m m } {
+\NewDocumentCommand \drawsquares { m m O{} } {
     \begin{scope}[#1]
         \regex_match:nnTF
             { [UDLR] }
             {#2}
-            {\bool_set_true:N  \l_tmpa_bool} % '-'   代表蓝色
-            {\bool_set_false:N \l_tmpa_bool} % '-' 不代表蓝色
+            {\bool_set_true:N  \l_cube_udlr_bool} % '-'   代表蓝色
+            {\bool_set_false:N \l_cube_udlr_bool} % '-' 不代表蓝色
+
+        \regex_match:nnTF
+            { [1-9] }
+            {#2}
+            {\bool_set_true:N  \l_cube_num_bool} % 把红蓝分别设置为 niceblue 和 nicered
+            {\bool_set_false:N \l_cube_num_bool} % 保持正常
 
         \int_zero:N \l_cube_tmpa_int
 
         % 按行优先顺序排列（第一行，然后第二行，最后第三行）
         \str_map_inline:nn {#2} {
-            \bool_if:NTF \l_tmpa_bool
+            \bool_if:NTF \l_cube_udlr_bool
                 {\str_set:Nn \l_tmpa_str {-}} % 把 UDLR 模式下所有格子背景置为默认灰色
                 {}
 
-                \int_incr:N \l_cube_tmpa_int
+            \int_incr:N \l_cube_tmpa_int
 
             % 计算行和列（从0开始）
             \int_set:Nn \l_cube_tmpb_int {\int_div_truncate:nn {\l_cube_tmpa_int - 1} {3}}  % 行号 (0,1,2)
             \int_set:Nn \l_cube_tmpc_int {\int_mod:nn {\l_cube_tmpa_int - 1} {3}}           % 列号 (0,1,2)
-
-            % \regex_match:nnTF
-            %     { [1-9] }
-            %     {##1}
-            %     {
-            %         \str_set:Nn \l_tmpa_str {-} % 是数字，背景为灰色
-            %         \str_set:Nn \l_tmpb_str {##1} % 包含数字，直接使用
-            %     }
-            %     {
-            %         \str_set:Nn \l_tmpa_str {##1} % 不是数字，使用原字符代表的颜色
-            %         \str_set:Nn \l_tmpb_str {} % 不包含数字，置为空
-            %     }
 
             \regex_match_case:nn
             {
@@ -95,34 +109,45 @@
                             \str_set:Nn \l_tmpb_str {##1} % 包含数字，直接使用
                         }
                 { [a-z-=] }{
-                            \bool_if:NTF \l_tmpa_bool % 判断是否画 OLL 步骤的示意图
-                                {\str_set:Nn \l_tmpa_str {b}} % 是则把 '-' 代表蓝色背景
-                                {\str_set:Nn \l_tmpa_str {##1}} % 不是则，使用原字符代表的颜色
-                            \str_set:Nn \l_tmpb_str {} % 内容置为空
+                            \bool_lazy_or:nnTF {\l_cube_udlr_bool} {\l_cube_num_bool}
+                                {
+                                    \regex_match_case:nn {
+                                        { r } {\str_set:Nn \l_tmpa_str {h}} % 数字模式下，把红色改为 nicered
+                                        { [\-b] } {\str_set:Nn \l_tmpa_str {l}} % 数字模式下，把蓝色改为 niceblue
+                                        { . } {\str_set:Nn \l_tmpa_str {##1}} % 数字模式下，其它颜色保持不变
+                                    } {##1}}
+                                {\str_set:Nn \l_tmpa_str {##1}}
+                            \str_set:Nn \l_tmpb_str {}      % 内容置为空
                         }
-                { [U] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int + 1.1) -- +(0.9,0);}
-                { [D] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int - 0.1) -- +(0.9,0);}
-                { [L] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int - 0.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
-                { [R] }{\draw[niceblue,line~width=3\pgflinewidth] (\l_cube_tmpc_int + 1.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
+                { [U] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int + 1.1) -- +(0.9,0);}
+                { [D] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int - 0.1) -- +(0.9,0);}
+                { [L] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int - 0.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
+                { [R] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int + 1.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
             }
             {##1}
+            
 
             % 获取颜色
             % \bool_if:NTF \l_tmpa_bool {\str_set:Nn \l_tmpa_str {-}} {\str_set:Nn \l_tmpa_str {##1}}
-            \prop_get:NVN \g_cube_color_map_prop {\l_tmpa_str} \l_cube_tmpd_tl
+            \prop_get:NVNF \g_cube_color_map_prop {\l_tmpa_str} \l_cube_tmpd_tl {\tl_set:Nn \l_cube_tmpd_tl {black!30}\errmessage{Invalid~parameter~for~\drawsquares}}
 
             % 绘制正方形（1cm边长，填充对应颜色，白色描边，2pt线宽）
             % 注意：Y坐标需要反转（第一行在顶部）
-            \fill[\l_cube_tmpd_tl, draw=black!10, line~width=2\pgflinewidth]
+            \bool_if:NTF \l_cube_udlr_bool
+                {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 OLL 等平面的公式示意图时方格间距宽一点
+                {\dim_set:Nn \l_cube_linewidth_dim {\pgflinewidth}}  % 作为立体魔方的一部分时，方格间距窄一点
+            \tl_if_empty:oF {#3} {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 PLL 等平面的公式示意图时方格间距宽一点
+            \fill[\l_cube_tmpd_tl, draw=black!10, line~width=\l_cube_linewidth_dim]
                 (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, scale=2, pos=0.5] {\str_use:N \l_tmpb_str};
         }
+
+        % 添加额外的作图语句
+        #3
     \end{scope}
 }
+% endregion
 
-\exp_args_generate:n {oonnn}
-\exp_args_generate:n {ooono}
-\exp_args_generate:n {Nen}
-
+% region \Cube 函数定义
 % 魔方绘制函数：绘制三面视图的魔方
 % 接收三个字符串参数和一个可选的尺寸参数
 % 第一个参数：正面五个字符（ABCDE -> ABCDbbEbb）
@@ -166,11 +191,13 @@
             }
     }
 
-    \exp_args:Noonnn \drawcube{\l_cube_front_expanded}{\l_cube_right_expanded}{#3}{#4}{}
+    \exp_args:Noonnn
+    \drawcube{\l_cube_front_expanded}{\l_cube_right_expanded}{#3}{#4}{}
 }
+% endregion
 
-% F2L 宏：用于绘制第一二层公式
-\int_new:N \g_cube_ffl_index_int
+% region \FLL 宏：用于绘制第一二层公式
+\int_new:N \g_cube_fll_index_int
 
 % 创建三个 coffin：序号、魔方图、公式
 \NewCoffin \l_cube_index_coffin
@@ -179,23 +206,23 @@
 \NewCoffin \l_cube_formula_coffin
 
 % 创建一个包含序号+内容的 coffin
-\NewCoffin \l_cube_coffin_output
+\NewCoffin \l_cube_output_coffin
 
-% 定义全局变量存储每个FTwoL的高度（以pt为单位）
-\newlength{\gfflheight}
-\setlength{\gfflheight}{0pt}
-\newlength{\gfflwidth}
-\setlength{\gfflwidth}{0pt}
+% 定义全局变量存储每个FLL的高度（以pt为单位）
+\newlength{\gfllheight}
+\setlength{\gfllheight}{0pt}
+\newlength{\gfllwidth}
+\setlength{\gfllwidth}{0pt}
 
-\NewDocumentCommand \FTwoL { m m m O{5mm} m } {
-    \SetHorizontalCoffin \l_cube_coffin_output {}
+\NewDocumentCommand \FLL { m m m O{5mm} m } {
+    \SetHorizontalCoffin \l_cube_output_coffin {}
 
     % 自动增长序号
-    \int_gincr:N \g_cube_ffl_index_int
+    \int_gincr:N \g_cube_fll_index_int
 
     % 填充序号
-    % \SetHorizontalCoffin \l_cube_index_coffin {\heiti\int_use:N \g_cube_ffl_index_int}
-    \SetHorizontalCoffin \l_cube_index_coffin {\texttt{\int_compare:nNnTF {\g_cube_ffl_index_int} > {9} {\int_use:N \g_cube_ffl_index_int} {0\int_use:N \g_cube_ffl_index_int}}}
+    % \SetHorizontalCoffin \l_cube_index_coffin {\heiti\int_use:N \g_cube_fll_index_int}
+    \SetHorizontalCoffin \l_cube_index_coffin {\texttt{\int_compare:nNnTF {\g_cube_fll_index_int} > {9} {\int_use:N \g_cube_fll_index_int} {0\int_use:N \g_cube_fll_index_int}}}
 
     % 填充魔方图
     \SetHorizontalCoffin \l_cube_cube_coffin {
@@ -222,20 +249,23 @@
     \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\tt\l_tmpa_tl}
 
     % 连接魔方和公式（水平对齐）
-    \JoinCoffins \l_cube_coffin_output [hc,vc] \l_cube_index_coffin [l,vc]
-    \JoinCoffins \l_cube_coffin_output [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (1em,0pt)
-    \JoinCoffins \l_cube_coffin_output [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
-    \JoinCoffins \l_cube_coffin_output [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (1em,0pt)
+    \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
+    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (1em,0pt)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (1em,0pt)
 
     % 缩放整体到合适大小
-    \ScaleCoffin \l_cube_coffin_output {0.65} {0.65}
+    \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
 
     % 输出（上下居中对齐）
     \vspace{3pt}
-    \TypesetCoffin \l_cube_coffin_output
+    \TypesetCoffin \l_cube_output_coffin
     \vspace{3pt}
 }
+% endregion
 
+% region \str_replace_char_tl:Nnn 函数定义
+% 替换字符串某个位置上的字符
 \cs_new:Npn \str_replace_char_tl:Nnn #1 #2 #3 {
   % 将字符串转换为token list，然后替换
   \tl_clear:N \l_tmpa_tl
@@ -248,12 +278,15 @@
   }
   \str_set:Ne #1 { \l_tmpb_tl }
 }
+% endregion
 
+% region \cubearrows 函数定义
 \seq_new:N \l_cube_notationa_seq % 存储多条绘图命令
-\tl_new:N \l_cube_notationa_tl % 存储绘图参数
-\tl_new:N \l_cube_notationb_tl % 存储绘图参数
-\tl_new:N \l_cube_notationc_tl % 存储绘图参数
-\tl_new:N \l_cube_notationd_tl % 临时存储由 \l_cube_notation_clist 拆解出来的每一个层数
+\str_map_inline:Nn {abcd} {\tl_new:c {l_cube_notation #1 _tl}}  % 批量定义变量
+    % \tl_new:N \l_cube_notationa_tl % 存储绘图参数
+    % \tl_new:N \l_cube_notationb_tl % 存储绘图参数
+    % \tl_new:N \l_cube_notationc_tl % 存储绘图参数
+    % \tl_new:N \l_cube_notationd_tl % 临时存储由 \l_cube_notation_clist 拆解出来的每一个层数
 \seq_new:N \l_cube_notationb_seq % 存储多个绘图参数
 \bool_new:N \l_cube_notation_bool % 顺时针为真，逆时针为假
 \clist_new:N \l_cube_notation_clist % 旋转层数列表
@@ -262,11 +295,8 @@
 \str_new:N \l_cube_notation_front_str % 正面颜色字符串
 \str_new:N \l_cube_notation_right_str % 右面颜色字符串
 \str_new:N \l_cube_notation_top_str % 顶面颜色字符串
-\NewDocumentCommand{\CubeNotation}{ m O{5mm} }{
-    \tl_clear:N \l_cube_notationa_tl
-    \tl_clear:N \l_cube_notationb_tl
-    \tl_clear:N \l_cube_notationc_tl
-    \tl_clear:N \l_cube_notationd_tl
+\NewDocumentCommand{\cubearrows}{ m m }{
+    \str_map_inline:Nn {abcd} {\tl_clear:c {l_cube_notation #1 _tl}}
     \seq_clear:N \l_cube_notationa_seq
     \seq_clear:N \l_cube_notationb_seq
     \bool_set_false:N \l_cube_notation_bool
@@ -287,8 +317,7 @@
             { [RrUuFfSxyz]} {\bool_set_true:N \l_cube_notation_bool} % 顺时针旋转
             { ['] } {\bool_set_inverse:N \l_cube_notation_bool} % 逆转旋转方向
             { [2] } {\seq_put_right:Ne \l_cube_notationa_seq {
-                            \exp_not:N\node[orange,scale=\scaleFactor,fill=white,inner~sep=1pt] at (4,2) {$\times2$};
-                        }
+                            \exp_not:N\node[orange,scale=\scaleFactor,fill=white,inner~sep=1pt] at (4,2) {$\times2$};}
                     }
             { [rRLlMx] } { % 旋转所在平面为 yz 平面
                             \tl_put_right:Nn \l_cube_notationc_tl {yz~plane}
@@ -338,12 +367,11 @@
         }
     }
 
+    % 添加占位的 bouding box ，以便不同的公式示意图保持对齐
     \seq_put_right:Ne \l_cube_notationa_seq {
-        \exp_not:N\node[node~font=\exp_not:N\tt,scale=\scaleFactor] at (3,-1.5,0) {#1};
-        \exp_not:N\useasboundingbox (-0.5,-2.5) (6.5,5.5);
+        \exp_not:N\useasboundingbox (-0.5,-1.5) (6.5,5.5);
     }
 
-    \seq_log:N\l_cube_notationa_seq
     \exp_args:Nooono
     \drawcube
         {\l_cube_notation_front_str}
@@ -352,11 +380,110 @@
         {#2}
         {\seq_use:Nn \l_cube_notationa_seq {}}
 }
+% endregion
 
-% \gen_cube_plane_tl:Nnn \l_tmpa_tl {xy} {z=-0.5}
+% region \CubeNotation 函数定义
+\NewDocumentCommand{\CubeNotation}{ m O{5mm} }{
+    \SetHorizontalCoffin \l_cube_output_coffin {}
+    \SetHorizontalCoffin \l_cube_cube_coffin {
+            \begin{tikzpicture}
+                \cubearrows{#1}{#2}
+            \end{tikzpicture}}
+    \SetHorizontalCoffin \l_cube_index_coffin {\tt#1}
+    \ScaleCoffin \l_cube_index_coffin {1.5} {1.5}
+    \SetHorizontalCoffin \l_cube_height_coffin {}
+
+    \JoinCoffins \l_cube_output_coffin[b,hc] \l_cube_cube_coffin[t,hc] (0pt,-1ex)
+    \JoinCoffins \l_cube_output_coffin[\l_cube_cube_coffin-b,\l_cube_cube_coffin-hc]
+                 \l_cube_index_coffin[t,hc] (0pt,-2ex)
+    \JoinCoffins \l_cube_output_coffin[\l_cube_index_coffin-b,\l_cube_index_coffin-hc]
+                 \l_cube_height_coffin[t,hc] (0pt,-1ex)
+    \TypesetCoffin \l_cube_output_coffin
+}
+% endregion
+
+% region \gen_arrows_bars_seq:Nnn 函数定义
+% 生成插入到 \drawsquares 第三个可选参数的语句
+% 储存到一个 seq 变量中，也就是第一个参数
+% 第二个参数是 <comma list> ，每一项都是由最多三个字符组成的，
+% 比如： ll,rrr,u-u,-dd 代表的是如下情形，顺时针排列，末尾的 '-' 可以省略
+%   u   u
+%   1 2 3 r
+% l 4 5 6 r
+% l 7 8 9 r
+%   d d
+% 第三个参数也是 <comma list> ，每一项由 1-9 的数字中间间隔 - 或 =
+% 数字代表方格的顺序如上所示，1-3，代表从方格1画一条方格3的箭头
+% 若：1-3-7-1 ，则代表从方格 1 指向 3 ，再从 3 画一条指向 7 ，再从 7 指回 1
+%    的三条箭头。
+% 若：1=3 ，则代表画一条从方格 1 和 方格 3 之间的双向箭头。
+\seq_new:N \l_cube_arrows_bars_seq  % 专门来存储生成的指令
+\seq_new:N \l_cube_arrows_barsa_seq % 临用来存储生成的指令
+\str_map_inline:nn {abxy} {\int_new:c {l_cube_arrows_ #1 _int}} % 批量定义临时坐标变量
+\cs_new_protected:Npn \gen_arrows_bars_seq:Nnn #1#2#3 {
+    \seq_clear:N \l_cube_arrows_barsa_seq
+    \clist_clear:N \l_tmpa_clist
+    \clist_set:Nn \l_tmpa_clist {#2}
+
+    \clist_map_inline:Nn \l_tmpa_clist {
+        \regex_match_case:nn { % 设置旋转角度，只绘制左边的杠，其它的边都是先在左边
+            { l }{\int_set:Nn \l_tmpa_int {0}  } % 绘制好之后再绕中心旋转相应的角度
+            { u }{\int_set:Nn \l_tmpa_int {-90}}
+            { r }{\int_set:Nn \l_tmpa_int {180}}
+            { d }{\int_set:Nn \l_tmpa_int {90} }}
+          {##1}
+        \int_step_inline:nn {\tl_count:n {##1}}{
+            \exp_args:Nennn \tl_if_eq:nnTF {\tl_item:nn {##1} {####1}} {-} {\tl_log:n {####1}}{
+                \seq_put_right:Ne \l_cube_arrows_barsa_seq {
+                    \exp_not:N\draw [rotatearound={\int_use:N \l_tmpa_int},black,line~width=3*\pgflinewidth]
+                        (-0.1,####1-0.95) -- +(0,0.9);}
+            }
+        }
+    }
+
+    \clist_clear:N \l_tmpb_clist
+    \clist_set:Nn  \l_tmpb_clist {#3}
+    \clist_map_inline:Nn \l_tmpb_clist {
+        \clist_log:n {##1}
+        \int_step_inline:nn {\int_div_truncate:nn {\str_count:n {##1} } {2}} {
+            % 获取每一个箭头的首尾的方格标号
+            \int_set:Nn \l_tmpa_int {\str_item:nn {##1} {2*####1 - 1}}
+            \int_set:Nn \l_tmpb_int {\str_item:nn {##1} {2*####1 + 1}}
+
+            % 把首尾方格标号转换成坐标分别存入四个变量中
+            \int_set:Nn \l_cube_arrows_b_int {2 - (\int_div_truncate:nn {\l_tmpa_int - 1} {3})} % 行号 (0,1,2)
+            \int_set:Nn \l_cube_arrows_a_int {\int_mod:nn {\l_tmpa_int - 1} {3}}                % 列号 (0,1,2)
+            \int_set:Nn \l_cube_arrows_y_int {2 - (\int_div_truncate:nn {\l_tmpb_int - 1} {3})} % 行号 (0,1,2)
+            \int_set:Nn \l_cube_arrows_x_int {\int_mod:nn {\l_tmpb_int - 1} {3}}                % 列号 (0,1,2)
+
+            % 根据箭头类型设置绘图语句中的标识
+            \exp_args:Nne \regex_match_case:nn {
+                { - } {\tl_set:Nn \l_tmpa_tl {->}}
+                { = } {\tl_set:Nn \l_tmpa_tl {<->}}
+                }
+                {\str_item:nn {##1} {2*####1}}
+
+            % 先在首尾两点绘制 node ，避免不同的箭头首尾相接
+            \seq_put_right:Ne \l_cube_arrows_barsa_seq {
+                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_a_int,0.5+\int_use:N \l_cube_arrows_b_int) node[inner~sep=3pt] (s) {};
+                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_x_int,0.5+\int_use:N \l_cube_arrows_y_int) node[inner~sep=3pt] (d) {};
+                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white,line~width=1.5pt] (s) -- (d);}
+        }
+    }
+
+    % 添加占位的 bouding box ，以便不同的公式示意图保持对齐
+    \seq_put_right:Ne \l_cube_arrows_barsa_seq {
+        \exp_not:N\useasboundingbox (-0.2,-0.2) rectangle (3.2,3.2);
+    }
+
+    % 将结果存储到第一个参数指定的序列中
+    \seq_set_eq:NN #1 \l_cube_arrows_barsa_seq
+}
+% endregion
 
 \ExplSyntaxOff
 
+% region \drawcube 函数定义
 % 魔方绘制函数：绘制三面视图的魔方
 \NewDocumentCommand{\drawcube}{ m m m m m }{
     \begin{scope}[3d cube={#4}]
@@ -373,12 +500,15 @@
         #5
     \end{scope}
 }
+% endregion
 
-% 在文档开始后自动测量第一个FTwoL的高度和宽度
+% region \AtBeginDocument 设置
+% 在文档开始后自动测量第一个FLL的高度和宽度
 \AtBeginDocument{
-\setbox0=\hbox{\mbox{\FTwoL{-----}{-----}{---------}{(RUR')}}}
-\setlength{\gfflwidth} {\wd0}  % 获取宽度
-\setlength{\gfflheight}{\ht0}  % 获取高度
-\addtolength{\gfflheight}{\dp0}  % 加上深度
-\addtolength{\gfflheight}{6pt}  % 额外增加垂直间距
+\setbox0=\hbox{\mbox{\FLL{-----}{-----}{---------}{(RUR')}}}
+\setlength{\gfllwidth} {\wd0}  % 获取宽度
+\setlength{\gfllheight}{\ht0}  % 获取高度
+\addtolength{\gfllheight}{\dp0}  % 加上深度
+\addtolength{\gfllheight}{6pt}  % 额外增加垂直间距
 }
+% endregion
