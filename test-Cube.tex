@@ -72,28 +72,39 @@
 % % \tl_set:Nx \l_tmpb_tl {cube_plane/.style={\tl_use:N \l_tmpa_tl}}
 % % \exp_args:NV \tikzset \l_tmpb_tl
 % \ExplSyntaxOff
-% \ExplSyntaxOn
-% % \exp_args_generate:n {NnN}
+\ExplSyntaxOn
+% \exp_args_generate:n {NnN}
 % \clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
 % {
-%   \begin{tikzpicture}
-%     \exp_args:No\CubeNotation{\l_tmpa_tl}[3mm]
-%   \end{tikzpicture}
+%   \exp_args:No\CubeNotation{\l_tmpa_tl} % \cubearrows{\l_tmpa_tl}{3mm}
+%   % \begin{tikzpicture}
+%   % \end{tikzpicture}
 %   \par
 % }
-% \ExplSyntaxOff
+\gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {lll,u-u,dd,-rr} {6-8-2-6,7=9}
+\seq_log:N \l_cube_arrows_bars_seq
 \begin{tikzpicture}
-  \CubeNotation{z}[2cm]
-  \drawsquares{yshift=-12cm,x=2cm,y=2cm}{L--L--DDR}
-% \Cube{123456789}{123456789}{123456789}[3cm]
-% \draw [ cube_plane,
-%         rotate around={-90:(1.5,1.5)},
-%         -{Stealth[length=1cm]},
-%         red,
-%         line width=3pt]
-% (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
-% \ExplSyntaxOn
+  \drawsquares{scale=2}{lllllllll}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
 \end{tikzpicture}
+\ExplSyntaxOff
+\vspace{2ex}\par
+\tikz{\cubearrows{f}{1.5cm}}\par
+\tikz{\drawsquares{}{L--L--DDR}}\par
+\tikz{\Cube{123456789}{123456789}{123456789}[3cm]}\par
+\tikz{\Cube{12345}{12345}{123456789}[3cm]}\par
+
+% \begin{tikzpicture}
+%   \cubearrows{z}{2cm}
+%   \drawsquares{yshift=-12cm}{L--L--DDR}
+% % \Cube{123456789}{123456789}{123456789}[3cm]
+% % \draw [ cube_plane,
+% %         rotate around={-90:(1.5,1.5)},
+% %         -{Stealth[length=1cm]},
+% %         red,
+% %         line width=3pt]
+% % (0,-0.2) .. controls (-0.5,3.5) .. (3.5,3);
+% % \ExplSyntaxOn
+% \end{tikzpicture}
 % \ExplSyntaxOff
 % \begin{tikzpicture}  
 % % \Cube{-brw-}{-brw-}{-brw-br-b}[3cm]
