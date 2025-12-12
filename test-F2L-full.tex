@@ -20,10 +20,10 @@
 
 \ExplSyntaxOn % 启用LaTeX3语法
 % 定义序列（变量名中不能有数字）
-\seq_new:N \g_cube_ffl_all_seq
+\seq_new:N \g_cube_fll_all_seq
 
 % 一次性设置序列（用逗号分隔）
-\seq_set_from_clist:Nn \g_cube_ffl_all_seq {
+\seq_set_from_clist:Nn \g_cube_fll_all_seq {
     {{---rb}{rb---}{---------}{(R\blue{U'}R'U)y'\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}}, % 1
     {{-b--b}{r----}{-------r-}{(UR\blue{U'}R'\blue{U'})\\y'(R'UR)}}, % 2
     {{----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}}, % 3
@@ -68,12 +68,12 @@
 }
 
 % 包装函数：将 {{#1}{#2}{#3}{#4}} 拆成 #1 #2 #3 #4 并包装为 tcolorbox
-\cs_new:Npn \FTwoL_wrapper:n #1 {
-    \FTwoL_split:w #1 \q_stop
+\cs_new:Npn \FLL_wrapper:n #1 {
+    \FLL_split:w #1 \q_stop
 }
 
-\cs_new:Npn \FTwoL_split:w #1 #2 #3 #4 \q_stop {
-    \hbox{\FTwoL {#1} {#2} {#3} {#4}}
+\cs_new:Npn \FLL_split:w #1 #2 #3 #4 \q_stop {
+    \hbox{\FLL {#1} {#2} {#3} {#4}}
 }
 
 % 关闭LaTeX3语法以正确解析tcolorbox键名
@@ -84,7 +84,7 @@
 \begin{tcolorbox}[
     blankest,
     breakable,
-    break at=11.2\gfflheight, % 11个公式一页高度（使用实际测量值）
+    break at=11.2\gfllheight, % 11个公式一页高度（使用实际测量值）
     width=.25\textwidth,  % 宽度固定为所有公式宽度
     halign=center,
     height fixed for=all,
@@ -92,10 +92,10 @@
     reset and store to box array,
 ]
 \ExplSyntaxOn
-\int_zero:N \g_cube_ffl_index_int
-\seq_map_function:NN \g_cube_ffl_all_seq \FTwoL_wrapper:n
+\int_zero:N \g_cube_fll_index_int
+\seq_map_function:NN \g_cube_fll_all_seq \FLL_wrapper:n
 \ExplSyntaxOff
-% \mbox{\hspace{\gfflwidth}\vspace{3\gfflheight}} % 最后留点空白
+% \mbox{\hspace{\gfllwidth}\vspace{3\gfllheight}} % 最后留点空白
 \end{tcolorbox}
 
 % ==================== 第2步：用tabularx属性创建4列布局 ====================
@@ -104,7 +104,7 @@
 \setlength\tabcolsep{.5em}         % 表格内边距为1em
 \newcolumntype{C}{>{\centering\arraybackslash}X}  % 对于X列
 
-\begin{tcolorbox}[blankest,height=11.3\gfflheight+2pt,width=\linewidth,halign=center]
+\begin{tcolorbox}[blankest,height=11.3\gfllheight+2pt,width=\linewidth,halign=center]
     \begin{tcolorbox}[
         enhanced,
         colback=myblue,
