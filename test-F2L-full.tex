@@ -3,109 +3,38 @@
 \usepackage{ctex}
 \usepackage{cube-grid}
 \usepackage[most]{tcolorbox}
-% \tcbuselibrary{breakable,skins,raster}
 \usepackage{array,tabularx,colortbl}
-% \usepackage{multicol}
 
 % 自定义颜色
 \definecolor{myblue}{RGB}{222, 244, 255}
 
-% 设置列间距和分割线（multicols配置，保留以防需要恢复）
-% \setlength\columnsep{10pt}
-% \setlength\columnseprule{.4pt}
-% \def\columnseprulecolor{\color{myblue!50!black}}
-\begin{document}
-
-\section*{所有 F2L 公式}
-
-\ExplSyntaxOn % 启用LaTeX3语法
-% 定义序列（变量名中不能有数字）
-\seq_new:N \g_cube_fll_all_seq
-
-% 一次性设置序列（用逗号分隔）
-\seq_set_from_clist:Nn \g_cube_fll_all_seq {
-    {{---rb}{rb---}{---------}{(R\blue{U'}R'U)y'\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}}, % 1
-    {{-b--b}{r----}{-------r-}{(UR\blue{U'}R'\blue{U'})\\y'(R'UR)}}, % 2
-    {{----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}}, % 3
-    {{---bw}{br---}{---------}{(RUR'\blue{U'})\\(RU2R'\blue{U'})\\(RUR')}}, % 4
-    {{---rw}{bb---}{---------}{(RF)U\\(R\blue{U'}R'\red{F'})(\blue{U'}R')\\或者\\(R\blue{U'}R'\blue{U'})(R\blue{U'}R'\blue{U})\\y'R'\blue{U'}R}}, % 5
-    {{-b--w}{b----}{-------r-}{y'(R'\blue{U'}RU)\\(R'\blue{U'}R)}}, % 6
-    {{----w}{b--r-}{-----b---}{(R\blue{U'}R'U)\\(R\blue{U'}R')}}, % 7
-    {{---br}{wr---}{---------}{(R\blue{U'}R'U)\\(R\red{U'}\blue{U'}R'U)\\(R\blue{U'}R')}}, % 8
-    {{---rr}{wb---}{---------}{(RU)F\\(RUR'\blue{U'})\\\red{F'}R'}}, % 9
-    {{-b--r}{w----}{-------r-}{y'(R'UR\blue{U'})\\(R'UR)}}, % 10
-    {{----r}{w--r-}{-----b---}{(RUR'\blue{U'})\\(RUR')}}, % 11
-    {{--rb-}{-rb--}{--------w}{(RUR'\blue{U'})2\\(RUR')}}, % 12
-    {{--rr-}{-bb--}{--------w}{(R\blue{U'}R'U)\\y'(R'UR)\\或者\\y'R'UR'FRF'R}}, % 13
-    {{-br--}{--b--}{-------rw}{y'(R'U2)\\(RUR'\blue{U'}R)}}, % 14
-    {{--r--}{--b--}{---r----w}{y'\blue{U'}\\(R'U2)\\(R\blue{U'}R'UR)}}, % 15
-    {{--r--}{--b--}{-r------w}{y'(R'UR\red{U'}\blue{U'})\\(R'\blue{U'}R)\\或者\\\blue{F'}L'U2LF}}, % 16
-    {{--r--}{--bb-}{-----r--w}{FU\\(R\blue{U'}R'\red{F'})\\(R\blue{U'}R')}}, % 17
-    {{-rr--}{--b--}{-------bw}{U(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'U)}}, % 18
-    {{--r--}{--b--}{---b----w}{(R\blue{U'}R'U2)\\(RUR')\\或者\\yFRU2R'\red{F'}}}, % 19
-    {{--r--}{--b--}{-b------w}{U(R\red{U'}\blue{U'})\\(R'UR\blue{U'}R')}}, % 20
-    {{--r--}{--br-}{-----b--w}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR')}}, % 21
-    {{--wb-}{-rr--}{--------b}{\blue{U'}(R\blue{U'}R'U2)\\(R\blue{U'}R')}}, % 22
-    {{--wr-}{-br--}{--------b}{\blue{U'}(RUR')\\y'(UR'\blue{U'}R)}}, % 23
-    {{-bw--}{--r--}{-------rb}{y'U\\(R'UR\blue{U'})\\(R'\blue{U'}R)}}, % 24
-    {{--w--}{--r--}{---r----b}{y'(R'\blue{U'}R)}}, % 25
-    {{--w--}{--r--}{-r------b}{y'U\\(R'\blue{U'}R\blue{U'})\\(R'\blue{U'}R)}}, % 26
-    {{--w--}{--rb-}{-----r--b}{y'(R\red{U'}\blue{U'})\\(R'2\blue{U'})\\(R2\blue{U'}R')}},% 27
-    {{-rw--}{--r--}{-------bb}{(lU)\\(r\blue{U'}r'\blue{U'})l'}}, % 28
-    {{--w--}{--r--}{---b----b}{\blue{U'}(R\red{U'}\blue{U'})\\(R'U2)(R\blue{U'}R')\\或者\\y'rU2R'2\\U'R2U'r'}}, % 29
-    {{--w--}{--r--}{-b------b}{\blue{U'}(RUR'\blue{U'})\\(R\red{U'}\blue{U'}R')}},% 30
-    {{--w--}{--rr-}{-----b--b}{UR\blue{U'}R'}}, % 31
-    {{--bb-}{-rw--}{--------r}{\blue{U'}(R\red{U'}\blue{U'}R'U)\\(RUR')}}, % 32
-    {{--br-}{-bw--}{--------r}{y'U(R'UR)\\d'(RUR')\\或者\\U(F'U'F)\\U'(RUR')}}, % 33
-    {{-bb--}{--w--}{-------rr}{y'\blue{U'}\\(R'UR)}}, % 34
-    {{--b--}{--w--}{---r----r}{y'U\\(R'\blue{U'}R\red{U'}\blue{U'})\\(R'UR)}}, % 35
-    {{--b--}{--w--}{-r------r}{y'U\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}}, % 36
-    {{--b--}{--wb-}{-----r--r}{(R\blue{U'}R'U2)\\y'(R'\blue{U'}R)}}, % 37
-    {{-rb--}{--w--}{-------br}{(R\blue{U'}R'U)\\(R\blue{U'}R'U2)\\(R\blue{U'}R')}}, % 38
-    {{--b--}{--w--}{---b----r}{\blue{U'}(RUR'U)\\(RUR')}}, % 39
-    {{--b--}{--w--}{-b------r}{R U R'}}, % 40
-    {{--b--}{--wr-}{-----b--r}{\blue{U'}(R\blue{U'}R'U)\\(RUR')}} % 41
-}
-
-% 包装函数：将 {{#1}{#2}{#3}{#4}} 拆成 #1 #2 #3 #4 并包装为 tcolorbox
-\cs_new:Npn \FLL_wrapper:n #1 {
-    \FLL_split:w #1 \q_stop
-}
-
-\cs_new:Npn \FLL_split:w #1 #2 #3 #4 \q_stop {
-    \hbox{\FLL {#1} {#2} {#3} {#4}}
-}
-
-% 关闭LaTeX3语法以正确解析tcolorbox键名
-\ExplSyntaxOff
-
-% ==================== 第1步：一次性生成并自动分页储存 ====================
-% 使用实际测量的高度：41个公式，每11个一页，最后一个页面8个公式
-\begin{tcolorbox}[
-    blankest,
-    breakable,
-    break at=11.2\gfllheight, % 11个公式一页高度（使用实际测量值）
-    width=.25\textwidth,  % 宽度固定为所有公式宽度
-    halign=center,
-    height fixed for=all,
-    % boxrule=0.2pt,
-    reset and store to box array,
-]
-\ExplSyntaxOn
-\int_zero:N \g_cube_fll_index_int
-\seq_map_function:NN \g_cube_fll_all_seq \FLL_wrapper:n
-\ExplSyntaxOff
-% \mbox{\hspace{\gfllwidth}\vspace{3\gfllheight}} % 最后留点空白
-\end{tcolorbox}
-
-% ==================== 第2步：用tabularx属性创建4列布局 ====================
 % 设置表格线条粗细和内边距
 \setlength\arrayrulewidth{0.3pt}  % 竖隔线细一点
-\setlength\tabcolsep{.5em}         % 表格内边距为1em
-\newcolumntype{C}{>{\centering\arraybackslash}X}  % 对于X列
+% \setlength\tabcolsep{.5em}         % 表格内边距为1em
 
-\begin{tcolorbox}[blankest,height=11.3\gfllheight+2pt,width=\linewidth,halign=center]
-    \begin{tcolorbox}[
+% region tcolorbox 风格设置
+% region 分页盒子的风格
+\tcbset{
+    pages/.style 2 args={
+        blankest,
+        breakable,
+        break at=#1, % 11个公式一页高度（使用实际测量值）
+        width=\textwidth/#2,  % 宽度固定为所有公式宽度
+        before={\parindent0pt},
+        size=tight,
+        % parskip=0pt, % 两行上下内容之间，不要默认间距，由自己控制
+        halign=center,
+        height fixed for=all,
+        reset and store to box array}}
+% endregion
+% region 定高盒子的风格
+\tcbset{
+    fixedheight/.style={
+        blankest,height=#1,width=\linewidth,halign=center}} % 11.3\gfllheight+2pt
+% endregion
+% region FLL 公式示意图盒子的风格
+\tcbset{
+    fll/.style={
         enhanced,
         colback=myblue,
         colframe=black!70,
@@ -115,17 +44,230 @@
         after skip=0pt,
         boxrule=0.6pt,
         arc=5mm,
-        boxsep=0mm,
-        title={\heiti 公式示意图（4列布局）},  % 标题
-        fonttitle=\bfseries,
-        % 关键：使用tabularx属性直接创建4列表格（默认顶部对齐）
-        tabularx={X|X|X|X},  % 4列等宽，顶部对齐，带分隔线
-        width=\linewidth,  % 宽度占满整行
-    ]
+        boxsep=0pt,
+        % left=0mm,
+        % right=0mm,
+        % 关键：使用tabularx属性直接创建n列表格（默认顶部对齐）
+        tabularx={X*{#1}{|X}},  % n列等宽，顶部对齐，带分隔线
+        width=\linewidth,}}  % 宽度占满整行
+% endregion
+% endregion
+
+\begin{document}
+
+\section*{所有 F2L 公式}
+
+\ExplSyntaxOn % 启用LaTeX3语法
+% 定义序列（变量名中不能有数字）
+\seq_new:N \g_cube_notation_all_seq
+\seq_new:N \g_cube_fll_all_seq
+\seq_new:N \g_cube_oll_all_seq
+\seq_new:N \g_cube_pll_all_seq
+
+% 一次性设置序列（用逗号分隔）
+% region \g_cube_fll_all_seq 设置魔方公式的各种记号解释
+\seq_set_from_clist:Nn \g_cube_notation_all_seq {R,R',R2,r,r',L,l,U,u,D,d,F,f,B,b,S,M,E,x,y,z}
+% endregion
+
+% region \g_cube_fll_all_seq 设置 F2L 阶段 41 个公式
+\seq_set_from_clist:Nn \g_cube_fll_all_seq {
+    {---rb}{rb---}{---------}{(R\blue{U'}R'U)y'\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}, % 1
+    {-b--b}{r----}{-------r-}{(UR\blue{U'}R'\blue{U'})\\y'(R'UR)}, % 2
+    {----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}, % 3
+    {---bw}{br---}{---------}{(RUR'\blue{U'})\\(RU2R'\blue{U'})\\(RUR')}, % 4
+    {---rw}{bb---}{---------}{(RF)U\\(R\blue{U'}R'\red{F'})(\blue{U'}R')\\或者\\(R\blue{U'}R'\blue{U'})(R\blue{U'}R'\blue{U})\\y'R'\blue{U'}R}, % 5
+    {-b--w}{b----}{-------r-}{y'(R'\blue{U'}RU)\\(R'\blue{U'}R)}, % 6
+    {----w}{b--r-}{-----b---}{(R\blue{U'}R'U)\\(R\blue{U'}R')}, % 7
+    {---br}{wr---}{---------}{(R\blue{U'}R'U)\\(R\red{U'}\blue{U'}R'U)\\(R\blue{U'}R')}, % 8
+    {---rr}{wb---}{---------}{(RU)F\\(RUR'\blue{U'})\\\red{F'}R'}, % 9
+    {-b--r}{w----}{-------r-}{y'(R'UR\blue{U'})\\(R'UR)}, % 10
+    {----r}{w--r-}{-----b---}{(RUR'\blue{U'})\\(RUR')}, % 11
+    {--rb-}{-rb--}{--------w}{(RUR'\blue{U'})2\\(RUR')}, % 12
+    {--rr-}{-bb--}{--------w}{(R\blue{U'}R'U)\\y'(R'UR)\\或者\\y'R'UR'FRF'R}, % 13
+    {-br--}{--b--}{-------rw}{y'(R'U2)\\(RUR'\blue{U'}R)}, % 14
+    {--r--}{--b--}{---r----w}{y'\blue{U'}\\(R'U2)\\(R\blue{U'}R'UR)}, % 15
+    {--r--}{--b--}{-r------w}{y'(R'UR\red{U'}\blue{U'})\\(R'\blue{U'}R)\\或者\\\blue{F'}L'U2LF}, % 16
+    {--r--}{--bb-}{-----r--w}{FU\\(R\blue{U'}R'\red{F'})\\(R\blue{U'}R')}, % 17
+    {-rr--}{--b--}{-------bw}{U(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'U)}, % 18
+    {--r--}{--b--}{---b----w}{(R\blue{U'}R'U2)\\(RUR')\\或者\\yFRU2R'\red{F'}}, % 19
+    {--r--}{--b--}{-b------w}{U(R\red{U'}\blue{U'})\\(R'UR\blue{U'}R')}, % 20
+    {--r--}{--br-}{-----b--w}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR')}, % 21
+    {--wb-}{-rr--}{--------b}{\blue{U'}(R\blue{U'}R'U2)\\(R\blue{U'}R')}, % 22
+    {--wr-}{-br--}{--------b}{\blue{U'}(RUR')\\y'(UR'\blue{U'}R)}, % 23
+    {-bw--}{--r--}{-------rb}{y'U\\(R'UR\blue{U'})\\(R'\blue{U'}R)}, % 24
+    {--w--}{--r--}{---r----b}{y'(R'\blue{U'}R)}, % 25
+    {--w--}{--r--}{-r------b}{y'U\\(R'\blue{U'}R\blue{U'})\\(R'\blue{U'}R)}, % 26
+    {--w--}{--rb-}{-----r--b}{y'(R\red{U'}\blue{U'})\\(R'2\blue{U'})\\(R2\blue{U'}R')}, % 27
+    {-rw--}{--r--}{-------bb}{(lU)\\(r\blue{U'}r'\blue{U'})l'}, % 28
+    {--w--}{--r--}{---b----b}{\blue{U'}(R\red{U'}\blue{U'})\\(R'U2)(R\blue{U'}R')\\或者\\y'rU2R'2\\U'R2U'r'}, % 29
+    {--w--}{--r--}{-b------b}{\blue{U'}(RUR'\blue{U'})\\(R\red{U'}\blue{U'}R')}, % 30
+    {--w--}{--rr-}{-----b--b}{UR\blue{U'}R'}, % 31
+    {--bb-}{-rw--}{--------r}{\blue{U'}(R\red{U'}\blue{U'}R'U)\\(RUR')}, % 32
+    {--br-}{-bw--}{--------r}{y'U(R'UR)\\\green{d'}(RUR')\\或者\\U(F'U'F)\\U'(RUR')}, % 33
+    {-bb--}{--w--}{-------rr}{y'\blue{U'}\\(R'UR)}, % 34
+    {--b--}{--w--}{---r----r}{y'U\\(R'\blue{U'}R\red{U'}\blue{U'})\\(R'UR)}, % 35
+    {--b--}{--w--}{-r------r}{y'U\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}, % 36
+    {--b--}{--wb-}{-----r--r}{(R\blue{U'}R'U2)\\y'(R'\blue{U'}R)}, % 37
+    {-rb--}{--w--}{-------br}{(R\blue{U'}R'U)\\(R\blue{U'}R'U2)\\(R\blue{U'}R')}, % 38
+    {--b--}{--w--}{---b----r}{\blue{U'}(RUR'U)\\(RUR')}, % 39
+    {--b--}{--w--}{-b------r}{R U R'}, % 40
+    {--b--}{--wr-}{-----b--r}{\blue{U'}(R\blue{U'}R'U)\\(RUR')} % 41
+}
+% endregion
+
+% region \g_cube_oll_all_seq 设置 OLL 阶段 57 个公式
+\seq_set_from_clist:Nn \g_cube_oll_all_seq {
+    {LURL-RLDR}{(R\red{U'}\blue{U'})\\(R'2FR\red{F'})\\U2(R'FR\red{F'})}, % 01
+    {LUUL-RLDD}{F(RUR'\blue{U'})\red{F'}\\f(RUR'\blue{U'})\red{f'}}, % 02
+    {UURL-RLD-}{f(RUR'\blue{U'})\red{f'}\\\blue{U'}\\F(RUR'\blue{U'})\red{F'}}, % 03
+    {LU-L-RDDR}{f(RUR'\blue{U'})\red{f'}\\\red{f'}U\\F(RUR'\blue{U'})\red{F'}}, % 04
+    {UURL--L--}{(r'U2)\\(RUR'U)r\\或者\\y2l'U2L\\UL'Ul}, % 05
+    {L--L--DDR}{(r\red{U'}U')\\(R'\blue{U'}R\blue{U'}r')\\或者\\y2lU2L'U'\\LU'l'}, % 06
+    {U-R--R-DD}{(rUR'U)\\(R\red{U'}\blue{U'}r')\\或者\\y2l2UL'U\\LU2l'}, % 07
+    {-UU--RD-R}{(r'\blue{U'}R\blue{U'})\\(R'U2r)\\或者\\y2l'U'LU'\\L'U2l}, % 08
+    {L-U--RDD-}{(RUR'\blue{U'})\\(R'F)\\(R2UR'\blue{U'})\red{F'}}, % 09
+    {UU---RL-D}{(RUR'\green{U})\\(R'FR\red{F'})\\(R\red{U'}\blue{U'}R')}, % 10
+    {UURL----D}{(r'R2UR'U)\\(R\red{U'}\blue{U'}R'U)\\green{M'}}, % 11
+    {--UL--DDR}{\green{M'}(R'\blue{U'}R\blue{U'})\\(R'U2R\blue{U'})M}, % 12
+    {LUU---LDD}{f(RU)\\(R2\blue{U'})\\(R'UR\blue{U'})\green{f'}}, % 13
+    {LUU---DD-}{(R'F)\\(RUR'\red{F'}R)\\(F\blue{U'}\red{F'})}, % 14
+    {UUR---LD-}{(r'\blue{U'}r)\\(R'\blue{U'}RU)\\(r'Ur)}, % 15
+    {LU----DDR}{(rUr')\\(RUR'\blue{U'})\\(r\blue{U'}r')}, % 16
+    {-UUL-RLD-}{(RUR'U)\\(R'FRF')\\U2(R'FRF')}, % 17
+    {-U-L-RDDD}{(rUR'U)\\(R\red{U'}\blue{U'}r')\\(r'\blue{U'}R\blue{U'})\\(R'U2r)}, % 18
+    {-U-L-RLDR}{(r'RU)\\(RUR'\blue{U'}r)\\(R'2FR\red{F'})}, % 19
+    {-U-L-R-D-}{(rUR'\blue{U'})\\\green{M'2}U\\(R\blue{U'}R'\blue{U'})\green{M'}}, % 20
+    {U-U---D-D}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR'\blue{U'})\\(R\blue{U'}R')}, % 21
+    {R-U---R-D}{(R\red{U'}\blue{U'})\\(R'2\blue{U'})(R2\blue{U'})\\(R'2\blue{U'})(\blue{U'}R)}, % 22
+    {U-U------}{(R'2\green{D'})\\(R\red{U'}\blue{U'}R'D)\\(R\green{U'}\blue{U'}R)}, % 23
+    {U-----D--}{(rUR'\blue{U'})\\(r'FR\red{F'})}, % 24
+    {L-------D}{\red{F'}(rUR'\blue{U'})\\(r'FR)}, % 25
+    {L-----D-R}{(R\red{U'}\blue{U'})\\(R'\blue{U'}R\blue{U'}R')\\或者\\y'R'U'RU'\\RU2R'}, % 26
+    {U-R-----D}{(RUR'\green{U})\\(R\red{U'}\blue{U'}R')\\或者\\y'R'U2R\\UR'UR}, % 27
+    {-----R-D-}{(rUR'\blue{U'})\\(r'RU)\\(R\blue{U'}R')}, % 28
+    {U----RDD-}{(RUR'\blue{U'})\\(R\blue{U'}R'\red{F'}\blue{U'}F)\\(RUR')}, % 29
+    {-U-L--L-R}{f(RU)\\(R2\blue{U'}R'U)\\(R2\blue{U'}R')\red{f'}}, % 30
+    {-UU--R--D}{R'FRUR'\\U'F2UFR}, % 31
+    {UU-L--D--}{(RU)(\red{B'}\blue{U'})\\(R'URBR')\\或者\\S(RUR'U')\\(R'FRf')}, % 32
+    {UU----DD-}{(RUR'\blue{U'})\\(R'FR\red{F'})}, % 33
+    {LUR----D-}{(RUR2\blue{U'})\\(R'F)\\(RUR\blue{U'}\green{F'})}, % 34
+    {-URL--D--}{(R\red{U'}\blue{U'})\\(R'2FR\red{F'})\\(R\red{U'}\blue{U'}R')}, % 35
+    {-UR--RD--}{(R'\blue{U'}R\blue{U'})\\(R'URU)\\(l\blue{U'}R'U)}, % 36
+    {--R--RDD-}{F(R\blue{U'}R'\blue{U'})\\(RUR'\red{F'})}, % 37
+    {U----R-DR}{(RUR'U)\\(R\blue{U'}R'\blue{U'})\\(R'FR\red{F'})}, % 38
+    {LU-----DD}{(RUR'\red{F'}\blue{U'}F)\\U(RU2R')}, % 39
+    {-UU---LD-}{(R'F)\\(RUR'\blue{U'})\\\red{F'}(UR)}, % 40
+    {U-U--R-D-}{(RUR'\green{U})\\(R\red{U'}\blue{U'}R')F\\(RUR'\blue{U'})\red{F'}}, % 41
+    {-U---RD-D}{(R'\blue{U'}R\blue{U'})\\(R'U2R)F\\(RUR'\blue{U'})\red{F'}}, % 42
+    {-UR--R--R}{(\red{B'}\blue{U'})\\(R'URB)\\或者\\f'(L'U'LU)f}, % 43
+    {LU-L--L--}{(f(RUR'\blue{U'})\red{f'})}, % 44
+    {LU----LD-}{F(RUR'\blue{U'})\red{F'}}, % 45
+    {--RL-R--R}{(R'\blue{U'})\\(R'FR\red{F'})\\(UR)}, % 46
+    {U-RL--DDR}{\red{b'}(\blue{U'}R'UR)2b\\或者\\F'(L'U'LU)2F}, % 47
+    {L-U--RLDD}{F(RUR'\blue{U'})2\red{F'}}, % 48
+    {UUR--RD-R}{(R\red{B'})\\(R'2FR2B)\\(R'\red{F'}R)}, % 49
+    {LUUL--L-D}{(r'U)\\(r2\blue{U'}r'2\blue{U'})\\(r2Ur')}, % 50
+    {LUU---LDD}{f(RUR'\blue{U'})2\red{f'}}, % 51
+    {L-UL-RL-D}{(R'\red{F'}\blue{U'}F\blue{U'})\\(RUR'\green{U}R)}, % 52
+    {UUU--RD-D}{(r'U2)\\(RUR'\blue{U'})\\(RUR'Ur)}, % 53
+    {U-U--RDDD}{(r\red{U'}\blue{U'})\\(R'\blue{U'}RU)\\(R'\blue{U'}R\blue{U'}r')}, % 54
+    {UUU---DDD}{(r\red{U'}\blue{U'}R'\blue{U'})\\(r'R2UR'\blue{U'})\\(r\blue{U'}r')}, % 55
+    {-U-----D-}{(RUR'\blue{U'})\\\green{M'}(UR\blue{U'}r')}, % 57
+    {LUR---LDR}{(rUr')\\(UR\blue{U'}R')2\\(r\blue{U'}r')\\或者\\(fRUR'U'F')\\(RUR'U')\\(R'F'Rf')}, % 56
+}
+% endregion
+
+% region \g_cube_pll_all_seq 设置 PLL 阶段 21 个公式
+\seq_set_from_clist:Nn \g_cube_pll_all_seq {
+    {l-l,uuu,r-r,d-d}{4-8-6-4}{Ua}{\orange{M'2}U\orange{M}U2\\\orange{M'}U\orange{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}, % 01
+    {l-l,uuu,r-r,d-d}{4-6-8-4}{Ub}{\orange{M'2}\blue{U'}\orange{M}U2\\\orange{M'}\blue{U'}\orange{M'2}\\或者\\(R2U)(RU)\\(R'U')2(R'UR')}, % 02
+    {l-l,u-u,r-r,d-d}{2=8,4=6}{H} {\orange{M'2}U\orange{M'2}\\U2\\\orange{M'2}U\orange{M'2}}, % 03
+    {l-l,u-u,r-r,d-d}{2=6,4=8}{Z} {\orange{M'}U\\(\orange{M'2}U)2\\\orange{M'}U2\\\orange{M'2}\blue{U'}}, % 04
+    {-ll,uu,-r,-d   }{3-9-7-3}{Aa}{x'R2\orange{D2}\\(R'\blue{U'}R)\orange{D2}\\(R'UR')}, % 05
+    {-ll,uu,-r,-d   }{3-7-9-3}{Ab}{x'(RU'R)D2\\(R'UR)D2R'2}, % 06
+    {-l,-u,-r,-d    }{1=7,3=9}{E} {x'(R\blue{U'}R'\orange{D})\\(RUR'\orange{D})2\\(R\blue{U'}R'\orange{D'})}, % 07
+    {l-l,uu,-dd     }{3=9,4=6}{T} {(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'\red{F'})}, % 08
+    {lll,u,-r,--d   }{2=8,3=9}{F} {(R'\blue{U'}\red{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'UR)}, % 09
+    {ll,--u,r,-dd   }{1=9,2=6}{V} {R'URU'R'f'\\(U'RU'2R')\\(\blue{U'}R\blue{U'}R')fR}, % 10
+    {rr,-dd         }{1=9,2=4}{Y} {F(R\blue{U'}R'\blue{U'})\\(RuR'\red{F'})\\(RuR'\blue{U'})\\(R'FR\red{F'})}, % 11
+    {-ll,uuu,r      }{6=8,7=9}{Ja}{z(\blue{U'}R\red{D'})\\(R2UR'\blue{U'})\\(R2U)\\(\red{D}R')}, % 12
+    {lll,uu,--d     }{3=9,6=8}{Jb}{(RUR'\blue{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})}, % 13
+    {ll,-u,--r,d-d  }{1=3,6=8}{Rb}{(R'U2)\\(R\red{U'}\blue{U'})\\(R'FRUR'\blue{U'})\\(R'\red{F'}R2\blue{U'})}, % 14
+    {l-l,-uu,-r,-dd }{2=4,3=9}{Ra}{(R\blue{U'}R'\blue{U'})\\(RUR\red{D})\\(R'\blue{U'}R\red{D'})\\(R'U2R'\blue{U'})}, % 15
+    {l-l,-uu        }{1-7-9-1,4-6-8-4}{Gc}{(R'2\blue{u'}R\red{U'}R)\\(UR'u)\\(R2fR'\red{f'})}, % 16
+    {l-l,-rr        }{1-3-7-1,2-4-6-2}{Gd}{(RUR')y'\\(R2\red{u'}R\blue{U'})\\(R'UR'uR2)}, % 17
+    {l-l,dd         }{1-3-7-1,2-4-6-2}{Ga}{R2UR'UR'\\U'RU'R2\\(U'D)R'UR\\(D'U)}, % 18
+    {l-l,rr         }{1-7-9-1,2-8-4-2}{Gb}{(R'd'F)\\(R2u)\\(R'U)\\(R\red{U'}R\blue{u'}R'2)}, % 19
+    {l,-uu,r,-dd    }{1=9,4=6}{Nb}{(R'UR\blue{U'})\\(R'\red{F'}\blue{U'})\\(FRUR'F)\\(R'\red{F'}R\blue{U'}R)}, % 20
+    {--l,uu,--r,dd  }{3=7,4=6}{Na}{(RUR'\red{U})\\(RUR'\blue{F'})\\(RUR'\blue{U'})(R'F)\\(R2\blue{U'}R'U2)\\(R\blue{U'}R')}, % 21
+}
+% endregion
+
+% 关闭LaTeX3语法以正确解析tcolorbox键名
+\ExplSyntaxOff
+
+% \begin{tcolorbox}[raster columns=3,raster rows=3]
+    
+% \end{tcolorbox}
+
+% region F2L 公式页面
+% ==================== 第1步：一次性生成并自动分页储存 ====================
+% 使用实际测量的高度：41个公式，每11个一页，最后一个页面8个公式
+\begin{tcolorbox}[pages={11.4\gfllheight}{4}]
+\ExplSyntaxOn
+\seq_map_variable:NNn \g_cube_fll_all_seq \l_tmpa_tl {
+    \hbox{\exp_after:wN\FLL\l_tmpa_tl}
+}
+\ExplSyntaxOff
+\end{tcolorbox}
+
+% ==================== 第2步：用tabularx属性创建4列布局 ====================
+\begin{tcolorbox}[fixedheight={11\gfllheight}]
+    \begin{tcolorbox}[fll={3}]
         % 直接使用储存的4个页面，顶部对齐
         \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4}
     \end{tcolorbox}
 \end{tcolorbox}
+% endregion
 
+% region OLL 公式页面
+% ==================== 第1步：一次性生成并自动分页储存 ====================
+% 使用实际测量的高度：57个公式，每2个一页，最后一个页面8个公式
+\begin{tcolorbox}[pages={12.4\gollheight}{5}]
+\ExplSyntaxOn
+\seq_map_variable:NNn \g_cube_oll_all_seq \l_tmpa_tl {
+    \hbox{\exp_after:wN\OLL\l_tmpa_tl}
+}
+\ExplSyntaxOff
+\end{tcolorbox}
+
+% ==================== 第2步：用tabularx属性创建4列布局 ====================
+\begin{tcolorbox}[fixedheight={12\gollheight}]
+    \begin{tcolorbox}[fll={4}]
+        % 直接使用储存的5个页面，顶部对齐
+        \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4} & \useboxarray{5}
+    \end{tcolorbox}
+\end{tcolorbox}
+% endregion
+
+% region PLL 公式页面
+% ==================== 第1步：一次性生成并自动分页储存 ====================
+% 使用实际测量的高度：57个公式，每2个一页，最后一个页面8个公式
+\begin{tcolorbox}[pages={5.4\gpllheight}{5}]
+\ExplSyntaxOn
+\seq_map_variable:NNn \g_cube_pll_all_seq \l_tmpa_tl {
+    \hbox{\exp_after:wN\PLL\l_tmpa_tl}
+}
+\ExplSyntaxOff
+\end{tcolorbox}
+
+% ==================== 第2步：用tabularx属性创建4列布局 ====================
+\begin{tcolorbox}[fixedheight={5\gpllheight}]
+    \begin{tcolorbox}[fll={4}]
+        % 直接使用储存的5个页面，顶部对齐
+        \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4} & \useboxarray{5}
+    \end{tcolorbox}
+\end{tcolorbox}
+% endregion
 
 \end{document}
