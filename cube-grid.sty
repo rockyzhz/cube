@@ -17,14 +17,44 @@
 % region 自定义命令
 \ProvideDocumentCommand{\red}{m}{\textcolor{red}{#1}}
 \ProvideDocumentCommand{\blue}{m}{\textcolor{blue}{#1}}
+\ProvideDocumentCommand{\orange}{m}{\textcolor{orange}{#1}}
+\ProvideDocumentCommand{\green}{m}{\textcolor{green}{#1}}
 % endregion
 
 % region tikz 设置
-\tikzset{3d cube/.style={
-    x={(340:0.8*#1)},  % 从330改为345，更接近水平
-    y={( 90:  1*#1)},
-    z={(200:0.8*#1)}   % 从210改为195，更接近水平
-}}
+\ExplSyntaxOn
+\let\regexmatchcasenn=\regex_match_case:nn
+\ExplSyntaxOff
+\NewDocumentCommand{\view}{ m }{
+    \regexmatchcasenn {
+        { i } % isometric
+            {
+                % 等轴测投影
+                \tikzset{3d cube/.style={
+                    x={(340:0.8*##1)},  % 从330改为340，更接近水平
+                    y={( 90:  1*##1)},
+                    z={(200:0.8*##1)}}}   % 从210改为200，更接近水平
+            }
+        { f } % front, 45 degree
+            {
+                % 45°倾斜视角
+                \tikzset{3d cube/.style={
+                    x={(  0:  1*##1)},  % 从330改为345，更接近水平
+                    y={( 90:  1*##1)},
+                    z={(225:0.5*##1)}}}   % 从210改为195，更接近水平
+            }
+        { r } % reverse coordinate
+            {
+                % 倒等轴测投影
+                \tikzset{3d cube/.style={
+                    x={(340:-0.8*##1)},  % 从330改为340，更接近水平
+                    y={( 90:  -1*##1)},
+                    z={(200:-0.8*##1)}}}   % 从210改为200，更接近水平
+            }
+    } {#1}
+}
+\view{i} % 设置当前坐标轴为等轴测投影
+
 \tikzset{
     xy plane/.style={canvas is xy plane at z=-#1+0.5,rotate around={-90:(1.5,1.5)}},
     zx plane/.style={canvas is zx plane at y=#1-0.5,rotate=90,rotate around={180:(1.5,1.5)}},
@@ -36,6 +66,7 @@
 % endregion 
 
 \ExplSyntaxOn
+\let\regexmatchcasenn=\regex_match_case:nn
 
 % region 展开函数自定义变种
 \exp_args_generate:n {oonnn}
@@ -45,7 +76,7 @@
 % endregion
 
 % region 定义颜色
-\definecolor{niceblue}{RGB}{17, 68, 99} % {58, 93, 132}
+\definecolor{niceblue}{RGB}{21, 108, 184} % {0, 103, 192} % {17, 68, 99} % {58, 93, 132}
 \definecolor{nicered} {RGB}{235, 51, 36}
 
 % 定义颜色映射
@@ -74,7 +105,7 @@
 
 % 主函数：根据字符串绘制彩色正方形（九宫格排列）
 % 使用 scope 环境，可以嵌套在其他 tikz 环境中
-\NewDocumentCommand \drawsquares { m m O{} } {
+\NewDocumentCommand \drawsquares { m m O{} O{b} } {
     \begin{scope}[#1]
         \regex_match:nnTF
             { [UDLR] }
@@ -105,7 +136,7 @@
             \regex_match_case:nn
             {
                 { [1-9] }{
-                            \str_set:Nn \l_tmpa_str {-} % 是数字，背景为灰色
+                            \str_set:Nn \l_tmpa_str {#4} % 是数字，背景为灰色
                             \str_set:Nn \l_tmpb_str {##1} % 包含数字，直接使用
                         }
                 { [a-z-=] }{
@@ -140,6 +171,9 @@
             \fill[\l_cube_tmpd_tl, draw=black!10, line~width=\l_cube_linewidth_dim]
                 (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, scale=2, pos=0.5] {\str_use:N \l_tmpb_str};
         }
+
+        % 添加占位的 bouding box ，以便不同的公式示意图保持对齐
+        \useasboundingbox (-0.2,-0.2) rectangle (3.2,3.2);
 
         % 添加额外的作图语句
         #3
@@ -197,7 +231,8 @@
 % endregion
 
 % region \FLL 宏：用于绘制第一二层公式
-\int_new:N \g_cube_fll_index_int
+\int_new:N  \g_cube_fll_index_int
+\int_zero:N \g_cube_fll_index_int
 
 % 创建三个 coffin：序号、魔方图、公式
 \NewCoffin \l_cube_index_coffin
@@ -250,17 +285,17 @@
 
     % 连接魔方和公式（水平对齐）
     \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
-    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (1em,0pt)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (.5em,0pt)
     \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
-    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (1em,0pt)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (.5em,0pt)
 
     % 缩放整体到合适大小
     \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
 
     % 输出（上下居中对齐）
-    \vspace{3pt}
+    % \vspace{3pt}
     \TypesetCoffin \l_cube_output_coffin
-    \vspace{3pt}
+    % \vspace{3pt}
 }
 % endregion
 
@@ -383,7 +418,7 @@
 % endregion
 
 % region \CubeNotation 函数定义
-\NewDocumentCommand{\CubeNotation}{ m O{5mm} }{
+\NewDocumentCommand{\CubeNotation}{ m O{3mm} }{
     \SetHorizontalCoffin \l_cube_output_coffin {}
     \SetHorizontalCoffin \l_cube_cube_coffin {
             \begin{tikzpicture}
@@ -399,6 +434,62 @@
     \JoinCoffins \l_cube_output_coffin[\l_cube_index_coffin-b,\l_cube_index_coffin-hc]
                  \l_cube_height_coffin[t,hc] (0pt,-1ex)
     \TypesetCoffin \l_cube_output_coffin
+}
+% endregion
+
+% region \OLL 函数定义
+\int_new:N  \g_cube_oll_index_int
+\int_zero:N \g_cube_oll_index_int
+
+% 定义全局变量存储每个FLL的高度（以pt为单位）
+\newlength{\gollheight}
+\setlength{\gollheight}{0pt}
+\newlength{\gollwidth}
+\setlength{\gollwidth}{0pt}
+
+\NewDocumentCommand{\OLL}{ m m O{6mm}}{
+    \SetHorizontalCoffin \l_cube_output_coffin {}
+
+    % 自动增长序号
+    \int_gincr:N \g_cube_oll_index_int
+    \SetHorizontalCoffin \l_cube_index_coffin {\tt\int_compare:nNnTF {\g_cube_oll_index_int} > {9} {\int_use:N \g_cube_oll_index_int} {0\int_use:N \g_cube_oll_index_int}}
+    % \ScaleCoffin \l_cube_index_coffin {1.5} {1.5}
+
+    \SetHorizontalCoffin \l_cube_cube_coffin {
+            \begin{tikzpicture}
+                \drawsquares{x=#3,y=#3}{#1}
+            \end{tikzpicture}}
+
+    % 填充公式
+    \tl_set:Ne \l_tmpa_tl {%
+        \raggedright% 左对齐文本
+        \heiti% 使用幼圆字体
+        % \itshape% 公式用斜体
+        #2%
+    }
+
+    % 注意：不要删除空格，否则无法正确断行
+    \regex_replace_all:nnN { [\ ]+ } { } \l_tmpa_tl
+
+    % 设置公式 coffin 宽度以及格式
+    \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\tt\l_tmpa_tl}
+
+    % 撑起高度 coffin（用于垂直居中对齐）
+    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{18ex}}
+
+    % 连接魔方和公式（水平对齐）
+    \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
+    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (.5em,0pt)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (.5em,0pt)
+
+    % 缩放整体到合适大小
+    \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
+
+    % 输出（上下居中对齐）
+    % \vspace{3pt}
+    \TypesetCoffin \l_cube_output_coffin
+    % \vspace{3pt}
 }
 % endregion
 
@@ -465,9 +556,9 @@
 
             % 先在首尾两点绘制 node ，避免不同的箭头首尾相接
             \seq_put_right:Ne \l_cube_arrows_barsa_seq {
-                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_a_int,0.5+\int_use:N \l_cube_arrows_b_int) node[inner~sep=3pt] (s) {};
-                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_x_int,0.5+\int_use:N \l_cube_arrows_y_int) node[inner~sep=3pt] (d) {};
-                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white,line~width=1.5pt] (s) -- (d);}
+                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_a_int,0.5+\int_use:N \l_cube_arrows_b_int) node[inner~sep=2pt] (s) {};
+                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_x_int,0.5+\int_use:N \l_cube_arrows_y_int) node[inner~sep=2pt] (d) {};
+                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white,line~width=1.5*\pgflinewidth] (s) -- (d);}
         }
     }
 
@@ -481,24 +572,66 @@
 }
 % endregion
 
-\ExplSyntaxOff
+% region \PLL 函数定义
+\int_new:N  \g_cube_pll_index_int
+\int_zero:N \g_cube_pll_index_int
 
-% region \drawcube 函数定义
-% 魔方绘制函数：绘制三面视图的魔方
-\NewDocumentCommand{\drawcube}{ m m m m m }{
-    \begin{scope}[3d cube={#4}]
-        % 绘制正面
-        \drawsquares{canvas is xy plane at z=0}{#1}
+% 定义全局变量存储每个FLL的高度（以pt为单位）
+\newlength{\gpllheight}
+\setlength{\gpllheight}{0pt}
+\newlength{\gpllwidth}
+\setlength{\gpllwidth}{0pt}
 
-        % 绘制右侧面（带倾斜效果）
-        \drawsquares{canvas is yz plane at x=3, rotate=-90}{#2}
+% 参数定义
+% 前两个参数的定义参照 \gen_arrows_bars_seq:Nnn 函数定义中的参数解释
+% 第三个参数是公式编号下的情形命名
+% 第四个参数是出现在最右边的公式
+% 第五个可选参数是画图中的单位长度，默认为 6mm
+\NewDocumentCommand{\PLL}{ m m m m O{6mm}}{
+    \SetHorizontalCoffin \l_cube_output_coffin {}
 
-        % 绘制顶面（带倾斜效果）
-        \drawsquares{canvas is zx plane at y=3, rotate= 90}{#3}
+    % 自动增长序号
+    \int_gincr:N \g_cube_pll_index_int
+    \SetVerticalCoffin \l_cube_index_coffin {2em} {\centering\tt\int_compare:nNnTF {\g_cube_pll_index_int} > {9} {\int_use:N \g_cube_pll_index_int} {0\int_use:N \g_cube_pll_index_int}\\[-5pt]#3}
+    % \ScaleCoffin \l_cube_index_coffin {1.5} {1.5}
 
-        % 其它的绘图语句（如边框等）可以在这里添加
-        #5
-    \end{scope}
+    \SetHorizontalCoffin \l_cube_cube_coffin {
+        \gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {#1} {#2}
+        \seq_log:N \l_cube_arrows_bars_seq
+        \begin{tikzpicture}
+            \drawsquares{x=#5,y=#5}{lllllllll}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
+        \end{tikzpicture}}
+
+    % 填充公式
+    \tl_set:Ne \l_tmpa_tl {%
+        \raggedright% 左对齐文本
+        \heiti% 使用幼圆字体
+        % \itshape% 公式用斜体
+        #4%
+    }
+
+    % 注意：不要删除空格，否则无法正确断行
+    \regex_replace_all:nnN { [\ ]+ } { } \l_tmpa_tl
+
+    % 设置公式 coffin 宽度以及格式
+    \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\tt\l_tmpa_tl}
+
+    % 撑起高度 coffin（用于垂直居中对齐）
+    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{18ex}}
+
+    % 连接魔方和公式（水平对齐）
+    \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
+    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (.5em,0pt)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (.5em,0pt)
+
+    % 缩放整体到合适大小
+    \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
+
+    % 输出（上下居中对齐）
+    % \vspace{3pt}
+    \TypesetCoffin \l_cube_output_coffin
+    % \vspace{3pt}
 }
 % endregion
 
@@ -509,6 +642,40 @@
 \setlength{\gfllwidth} {\wd0}  % 获取宽度
 \setlength{\gfllheight}{\ht0}  % 获取高度
 \addtolength{\gfllheight}{\dp0}  % 加上深度
-\addtolength{\gfllheight}{6pt}  % 额外增加垂直间距
+% \addtolength{\gfllheight}{6pt}  % 额外增加垂直间距
+\setbox0=\hbox{\mbox{\OLL{---------}{(RUR')}}}
+\setlength{\gollwidth} {\wd0}  % 获取宽度
+\setlength{\gollheight}{\ht0}  % 获取高度
+\addtolength{\gollheight}{\dp0}  % 加上深度
+% \addtolength{\gollheight}{6pt}  % 额外增加垂直间距
+\setbox0=\hbox{\mbox{\PLL{u,d,l,r}{}{Ua}{(RUR')}}}
+\setlength{\gpllwidth} {\wd0}  % 获取宽度
+\setlength{\gpllheight}{\ht0}  % 获取高度
+\addtolength{\gpllheight}{\dp0}  % 加上深度
+% \addtolength{\gpllheight}{6pt}  % 额外增加垂直间距
+\int_zero:N \g_cube_fll_index_int
+\int_zero:N \g_cube_oll_index_int
+\int_zero:N \g_cube_pll_index_int
 }
 % endregion
+
+% region \drawcube 函数定义
+% 魔方绘制函数：绘制三面视图的魔方
+\NewDocumentCommand{\drawcube}{ m m m m m }{
+    \begin{scope}[3d~cube={#4}]
+        % 绘制正面
+        \drawsquares{canvas~is~xy~plane~at~z=0}{#1}
+
+        % 绘制右侧面
+        \drawsquares{canvas~is~yz~plane~at~x=3,~rotate=-90}{#2}[][r]
+
+        % 绘制顶面
+        \drawsquares{canvas~is~zx~plane~at~y=3,~rotate=~90}{#3}[][y]
+
+        % 其它的绘图语句（如边框等）可以在这里添加
+        #5
+    \end{scope}
+}
+% endregion
+
+\ExplSyntaxOff
