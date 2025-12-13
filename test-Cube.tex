@@ -75,23 +75,36 @@
 \ExplSyntaxOn
 % \exp_args_generate:n {NnN}
 % \clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
+%   {
+%     \exp_args:No\CubeNotation{\l_tmpa_tl}\par
+%   }
+% \clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
 % {
 %   \exp_args:No\CubeNotation{\l_tmpa_tl} % \cubearrows{\l_tmpa_tl}{3mm}
 %   % \begin{tikzpicture}
 %   % \end{tikzpicture}
 %   \par
 % }
-\gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {lll,u-u,dd,-rr} {6-8-2-6,7=9}
-\seq_log:N \l_cube_arrows_bars_seq
-\begin{tikzpicture}
-  \drawsquares{scale=2}{lllllllll}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
-\end{tikzpicture}
-\ExplSyntaxOff
-\vspace{2ex}\par
-\tikz{\cubearrows{f}{1.5cm}}\par
-\tikz{\drawsquares{}{L--L--DDR}}\par
-\tikz{\Cube{123456789}{123456789}{123456789}[3cm]}\par
-\tikz{\Cube{12345}{12345}{123456789}[3cm]}\par
+% \CubeNotation{R}
+\OLL{LURL-RLDR}{(R\red{U'}\blue{U'})\\(R'2FR\red{F'})\\U2(R'FR\red{F'})}
+
+% \gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {lll,u-u,dd,-rr} {6-8-2-6,7=9}
+% \seq_log:N \l_cube_arrows_bars_seq
+% \begin{tikzpicture}
+%   \drawsquares{scale=2}{lllllllll}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
+% \end{tikzpicture}
+
+\PLL{l-l,uuu,r-r,d-d}{4-8-6-4}{Ua}{\orange{M'2}U\orange{M}U2\\\orange{M'}U\orange{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}
+
+% \ExplSyntaxOff
+% \vspace{2ex}\par
+% \tikz{\cubearrows{f}{1.5cm}}\par
+% \tikz{\drawsquares{}{L--L--DDR}}\par
+\par\tikz{\Cube{123456789}{123456789}{123456789}[2cm]}
+\par\tikz{\Cube{12345}{12345}{123456789}[2cm]}
+% \tikzset{reverse~coordinate}
+\view{r}
+\par\tikz{\Cube{-r--r----}{-b--b----}{-w-www-w-}[2cm]}
 
 % \begin{tikzpicture}
 %   \cubearrows{z}{2cm}
