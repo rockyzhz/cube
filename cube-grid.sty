@@ -59,8 +59,8 @@
     xy plane/.style={canvas is xy plane at z=-#1+0.5,rotate around={-90:(1.5,1.5)}},
     zx plane/.style={canvas is zx plane at y=#1-0.5,rotate=90,rotate around={180:(1.5,1.5)}},
     yz plane/.style={canvas is yz plane at x=#1-0.5,rotate=-90},
-    clockwise/.style={-{Stealth[length=0.8*#1]},red,line width=.1*#1},
-    anticlockwise/.style={{Stealth[length=0.8*#1]}-,red,line width=.1*#1},
+    clockwise/.style={-{Stealth[length=1*#1]},red,line width=.2*#1},
+    anticlockwise/.style={{Stealth[length=1*#1]}-,red,line width=.2*#1},
     rotatearound/.style={rotate around={#1:(1.5,1.5)}},
 }
 % endregion 
@@ -173,7 +173,7 @@
         }
 
         % 添加占位的 bouding box ，以便不同的公式示意图保持对齐
-        \useasboundingbox (-0.2,-0.2) rectangle (3.2,3.2);
+        \useasboundingbox (-0.3,-0.3) rectangle (3.3,3.3);
 
         % 添加额外的作图语句
         #3
@@ -243,7 +243,7 @@
 % 创建一个包含序号+内容的 coffin
 \NewCoffin \l_cube_output_coffin
 
-% 定义全局变量存储每个FLL的高度（以pt为单位）
+% 定义全局变量存储每个FLL的高度
 \newlength{\gfllheight}
 \setlength{\gfllheight}{0pt}
 \newlength{\gfllwidth}
@@ -257,7 +257,7 @@
 
     % 填充序号
     % \SetHorizontalCoffin \l_cube_index_coffin {\heiti\int_use:N \g_cube_fll_index_int}
-    \SetHorizontalCoffin \l_cube_index_coffin {\texttt{\int_compare:nNnTF {\g_cube_fll_index_int} > {9} {\int_use:N \g_cube_fll_index_int} {0\int_use:N \g_cube_fll_index_int}}}
+    \SetVerticalCoffin \l_cube_index_coffin {2em} {\centering\tt\int_compare:nNnTF {\g_cube_fll_index_int} > {9} {\int_use:N \g_cube_fll_index_int} {0\int_use:N \g_cube_fll_index_int}}
 
     % 填充魔方图
     \SetHorizontalCoffin \l_cube_cube_coffin {
@@ -339,7 +339,7 @@
     \str_set:Nn \l_cube_notation_front_str {---------} % 默认正面颜色均为灰色
     \str_set:Nn \l_cube_notation_right_str {---------} % 默认右面颜色均为灰色
     \str_set:Nn \l_cube_notation_top_str   {---------} % 默认顶面颜色均为灰色
-    \l_cube_unit_dim=#2\relax
+    \l_cube_unit_dim=#2
     \pgfmathsetmacro{\scaleFactor}{\l_cube_unit_dim/3mm}
     \regex_match_case_all:nn
         {
@@ -418,7 +418,13 @@
 % endregion
 
 % region \CubeNotation 函数定义
-\NewDocumentCommand{\CubeNotation}{ m O{3mm} }{
+% 定义全局变量存储每个 CubeNotation 的高度
+\newlength{\gnotationheight}
+\setlength{\gnotationheight}{0pt}
+\newlength{\gnotationwidth}
+\setlength{\gnotationwidth}{0pt}
+
+\NewDocumentCommand{\CubeNotation}{ m O{5mm} }{
     \SetHorizontalCoffin \l_cube_output_coffin {}
     \SetHorizontalCoffin \l_cube_cube_coffin {
             \begin{tikzpicture}
@@ -441,7 +447,7 @@
 \int_new:N  \g_cube_oll_index_int
 \int_zero:N \g_cube_oll_index_int
 
-% 定义全局变量存储每个FLL的高度（以pt为单位）
+% 定义全局变量存储每个OLL的高度
 \newlength{\gollheight}
 \setlength{\gollheight}{0pt}
 \newlength{\gollwidth}
@@ -452,7 +458,7 @@
 
     % 自动增长序号
     \int_gincr:N \g_cube_oll_index_int
-    \SetHorizontalCoffin \l_cube_index_coffin {\tt\int_compare:nNnTF {\g_cube_oll_index_int} > {9} {\int_use:N \g_cube_oll_index_int} {0\int_use:N \g_cube_oll_index_int}}
+    \SetVerticalCoffin \l_cube_index_coffin {2em} {\centering\tt\int_compare:nNnTF {\g_cube_oll_index_int} > {9} {\int_use:N \g_cube_oll_index_int} {0\int_use:N \g_cube_oll_index_int}}
     % \ScaleCoffin \l_cube_index_coffin {1.5} {1.5}
 
     \SetHorizontalCoffin \l_cube_cube_coffin {
@@ -576,7 +582,7 @@
 \int_new:N  \g_cube_pll_index_int
 \int_zero:N \g_cube_pll_index_int
 
-% 定义全局变量存储每个FLL的高度（以pt为单位）
+% 定义全局变量存储每个FLL的高度
 \newlength{\gpllheight}
 \setlength{\gpllheight}{0pt}
 \newlength{\gpllwidth}
@@ -638,23 +644,32 @@
 % region \AtBeginDocument 设置
 % 在文档开始后自动测量第一个FLL的高度和宽度
 \AtBeginDocument{
-\setbox0=\hbox{\mbox{\FLL{-----}{-----}{---------}{(RUR')}}}
-\setlength{\gfllwidth} {\wd0}  % 获取宽度
-\setlength{\gfllheight}{\ht0}  % 获取高度
-\addtolength{\gfllheight}{\dp0}  % 加上深度
-% \addtolength{\gfllheight}{6pt}  % 额外增加垂直间距
-\setbox0=\hbox{\mbox{\OLL{---------}{(RUR')}}}
-\setlength{\gollwidth} {\wd0}  % 获取宽度
-\setlength{\gollheight}{\ht0}  % 获取高度
-\addtolength{\gollheight}{\dp0}  % 加上深度
-% \addtolength{\gollheight}{6pt}  % 额外增加垂直间距
-\setbox0=\hbox{\mbox{\PLL{u,d,l,r}{}{Ua}{(RUR')}}}
-\setlength{\gpllwidth} {\wd0}  % 获取宽度
-\setlength{\gpllheight}{\ht0}  % 获取高度
-\addtolength{\gpllheight}{\dp0}  % 加上深度
-% \addtolength{\gpllheight}{6pt}  % 额外增加垂直间距
+% notation
+\box_new:N \g_cube_notation_box
+\hbox_set:Nn \g_cube_notation_box {\CubeNotation{z}}
+\dim_set:Nn \gnotationwidth { \box_wd:N \g_cube_notation_box }
+\dim_set:Nn \gnotationheight { \box_ht_plus_dp:N \g_cube_notation_box }
+\let\gcubenotationbox=\g_cube_notation_box
+% fll
+\box_new:N \g_cube_fll_box
+\hbox_set:Nn \g_cube_fll_box {\FLL{-----}{-----}{---------}{(RUR')}}
+\dim_set:Nn \gfllwidth { \box_wd:N \g_cube_fll_box }
+\dim_set:Nn \gfllheight { \box_ht_plus_dp:N \g_cube_fll_box }
+\let\gcubefllbox=\g_cube_fll_box
 \int_zero:N \g_cube_fll_index_int
+% oll
+\box_new:N \g_cube_oll_box
+\hbox_set:Nn \g_cube_oll_box {\OLL{---------}{(RUR')}}
+\dim_set:Nn \gollwidth { \box_wd:N \g_cube_oll_box }
+\dim_set:Nn \gollheight { \box_ht_plus_dp:N \g_cube_oll_box }
+\let\gcubeollbox=\g_cube_oll_box
 \int_zero:N \g_cube_oll_index_int
+% pll
+\box_new:N \g_cube_pll_box
+\hbox_set:Nn \g_cube_pll_box {\PLL{u,d,l,r}{}{Ua}{(RUR')}}
+\dim_set:Nn \gpllwidth { \box_wd:N \g_cube_pll_box }
+\dim_set:Nn \gpllheight { \box_ht_plus_dp:N \g_cube_pll_box }
+\let\gcubepllbox=\g_cube_pll_box
 \int_zero:N \g_cube_pll_index_int
 }
 % endregion
@@ -672,6 +687,7 @@
         % 绘制顶面
         \drawsquares{canvas~is~zx~plane~at~y=3,~rotate=~90}{#3}[][y]
 
+        \useasboundingbox (0,-2) rectangle (6,6);
         % 其它的绘图语句（如边框等）可以在这里添加
         #5
     \end{scope}
