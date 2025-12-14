@@ -10,7 +10,7 @@
 
 % 设置表格线条粗细和内边距
 \setlength\arrayrulewidth{0.3pt}  % 竖隔线细一点
-% \setlength\tabcolsep{.5em}         % 表格内边距为1em
+\setlength\tabcolsep{2pt}         % 表格内边距为1em
 
 % region tcolorbox 风格设置
 % region 分页盒子的风格
@@ -30,7 +30,7 @@
 % region 定高盒子的风格
 \tcbset{
     fixedheight/.style={
-        blankest,height=#1,width=\linewidth,halign=center}} % 11.3\gfllheight+2pt
+        blankest,height=#1,width=\linewidth,halign=center,valign=center}} % 11.3\gfllheight+2pt
 % endregion
 % region FLL 公式示意图盒子的风格
 \tcbset{
@@ -51,6 +51,60 @@
         tabularx={X*{#1}{|X}},  % n列等宽，顶部对齐，带分隔线
         width=\linewidth,}}  % 宽度占满整行
 % endregion
+
+% region 定义 MultiColsBox 盒子
+\ExplSyntaxOn
+\int_new:N \l_multicolsbox_columns_int
+\int_new:N \l_multicolsbox_columns_minusone_int
+\int_new:N \l_multicolsbox_rows_int
+\box_new:N \l_multicolsbox_box_box
+\seq_new:N \l_multicolsbox_boxarray_seq
+\dim_new:N \l_multicolsbox_height_dim
+\dim_new:N \l_multicolsbox_width_dim
+\fp_new:N \l_multicolsbox_rows_fp
+
+\keys_define:nn { MultiColsBox }
+{
+    % columns .int_set:N = \l_multicolsbox_columns_int,
+    columns .code:n = {
+                        \int_set:Nn \l_multicolsbox_columns_int {#1}
+                        \int_set:Nn \l_multicolsbox_columns_minusone_int {\int_eval:n {#1 - 1}}
+                    },
+    columns .default:n = 4,
+    % rows .int_set:N = \l_multicolsbox_rows_int,
+    rows .code:n =  {
+                        \int_set:Nn \l_multicolsbox_rows_int {#1}
+                        \fp_set:Nn \l_multicolsbox_rows_fp {\fp_eval:n {1.02*#1}}
+                    },
+    rows .value_required:n = true,
+    box .code:n =   {
+                        \box_set_eq:NN \l_multicolsbox_box_box #1
+                        \dim_set:Nn \l_multicolsbox_height_dim {\box_ht_plus_dp:N \l_multicolsbox_box_box}
+                        \dim_set:Nn \l_multicolsbox_width_dim {\box_wd:N \l_multicolsbox_box_box}
+                    },
+    box .value_required:n = true
+}
+\NewDocumentEnvironment{MultiColsBox}{ O{} }
+{
+    \keys_set:nn {MultiColsBox} {#1}
+    \begin{tcolorbox}[pages={\dim_eval:n {\fp_use:N \l_multicolsbox_rows_fp \l_multicolsbox_height_dim}}{\int_use:N \l_multicolsbox_columns_int}]
+}
+{
+    \end{tcolorbox}
+    \int_step_inline:nn {\int_use:N \l_multicolsbox_columns_int} {
+        \seq_put_right:Nn \l_multicolsbox_boxarray_seq {
+            \useboxarray{##1}
+        }
+    }
+    \begin{tcolorbox}[fixedheight={\dim_eval:n {\int_use:N \l_multicolsbox_rows_int \l_multicolsbox_height_dim}}]
+        \begin{tcolorbox}[fll={\int_use:N \l_multicolsbox_columns_minusone_int}]
+            % 直接使用储存的页面，顶部对齐
+            \seq_use:Nn \l_multicolsbox_boxarray_seq { & }
+        \end{tcolorbox}
+    \end{tcolorbox}
+}
+\ExplSyntaxOff
+% endregion
 % endregion
 
 \begin{document}
@@ -64,7 +118,7 @@
 \seq_new:N \g_cube_oll_all_seq
 \seq_new:N \g_cube_pll_all_seq
 
-% 一次性设置序列（用逗号分隔）
+% region 一次性设置序列（用逗号分隔）
 % region \g_cube_fll_all_seq 设置魔方公式的各种记号解释
 \seq_set_from_clist:Nn \g_cube_notation_all_seq {R,R',R2,r,r',L,l,U,u,D,d,F,f,B,b,S,M,E,x,y,z}
 % endregion
@@ -202,72 +256,56 @@
     {--l,uu,--r,dd  }{3=7,4=6}{Na}{(RUR'\red{U})\\(RUR'\blue{F'})\\(RUR'\blue{U'})(R'F)\\(R2\blue{U'}R'U2)\\(R\blue{U'}R')}, % 21
 }
 % endregion
+% endregion
+
+\begin{tcbraster}[
+    enhanced,
+    size=small,
+    attach~boxed~title~to~top~left,
+    title=魔方转动公式符号及示意图,
+    raster~columns=7,
+    raster~equal~height,
+    ]
+\seq_map_variable:NNn \g_cube_notation_all_seq \l_tmpa_tl
+  {
+    \begin{tcolorbox}[blankest,size=tight]
+        \exp_args:No\CubeNotation{\l_tmpa_tl}
+    \end{tcolorbox}
+  }
+\end{tcbraster}
 
 % 关闭LaTeX3语法以正确解析tcolorbox键名
 \ExplSyntaxOff
 
-% \begin{tcolorbox}[raster columns=3,raster rows=3]
-    
-% \end{tcolorbox}
-
+% region fll风格的公式盒子
 % region F2L 公式页面
-% ==================== 第1步：一次性生成并自动分页储存 ====================
-% 使用实际测量的高度：41个公式，每11个一页，最后一个页面8个公式
-\begin{tcolorbox}[pages={11.4\gfllheight}{4}]
+\begin{MultiColsBox}[columns=4,rows=11,box={\gcubefllbox}]
 \ExplSyntaxOn
 \seq_map_variable:NNn \g_cube_fll_all_seq \l_tmpa_tl {
     \hbox{\exp_after:wN\FLL\l_tmpa_tl}
 }
 \ExplSyntaxOff
-\end{tcolorbox}
-
-% ==================== 第2步：用tabularx属性创建4列布局 ====================
-\begin{tcolorbox}[fixedheight={11\gfllheight}]
-    \begin{tcolorbox}[fll={3}]
-        % 直接使用储存的4个页面，顶部对齐
-        \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4}
-    \end{tcolorbox}
-\end{tcolorbox}
+\end{MultiColsBox}
 % endregion
 
 % region OLL 公式页面
-% ==================== 第1步：一次性生成并自动分页储存 ====================
-% 使用实际测量的高度：57个公式，每2个一页，最后一个页面8个公式
-\begin{tcolorbox}[pages={12.4\gollheight}{5}]
+\begin{MultiColsBox}[columns=5,rows=12,box={\gcubeollbox}]
 \ExplSyntaxOn
 \seq_map_variable:NNn \g_cube_oll_all_seq \l_tmpa_tl {
     \hbox{\exp_after:wN\OLL\l_tmpa_tl}
 }
 \ExplSyntaxOff
-\end{tcolorbox}
-
-% ==================== 第2步：用tabularx属性创建4列布局 ====================
-\begin{tcolorbox}[fixedheight={12\gollheight}]
-    \begin{tcolorbox}[fll={4}]
-        % 直接使用储存的5个页面，顶部对齐
-        \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4} & \useboxarray{5}
-    \end{tcolorbox}
-\end{tcolorbox}
+\end{MultiColsBox}
 % endregion
 
 % region PLL 公式页面
-% ==================== 第1步：一次性生成并自动分页储存 ====================
-% 使用实际测量的高度：57个公式，每2个一页，最后一个页面8个公式
-\begin{tcolorbox}[pages={5.4\gpllheight}{5}]
+\begin{MultiColsBox}[columns=5,rows=5,box={\gcubepllbox}]
 \ExplSyntaxOn
 \seq_map_variable:NNn \g_cube_pll_all_seq \l_tmpa_tl {
     \hbox{\exp_after:wN\PLL\l_tmpa_tl}
 }
 \ExplSyntaxOff
-\end{tcolorbox}
-
-% ==================== 第2步：用tabularx属性创建4列布局 ====================
-\begin{tcolorbox}[fixedheight={5\gpllheight}]
-    \begin{tcolorbox}[fll={4}]
-        % 直接使用储存的5个页面，顶部对齐
-        \useboxarray{1} & \useboxarray{2} & \useboxarray{3} & \useboxarray{4} & \useboxarray{5}
-    \end{tcolorbox}
-\end{tcolorbox}
+\end{MultiColsBox}
 % endregion
-
+% endregion
 \end{document}
