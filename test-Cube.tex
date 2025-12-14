@@ -74,10 +74,10 @@
 % \ExplSyntaxOff
 \ExplSyntaxOn
 % \exp_args_generate:n {NnN}
-% \clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
-%   {
-%     \exp_args:No\CubeNotation{\l_tmpa_tl}\par
-%   }
+\clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
+  {
+    \exp_args:No\CubeNotation{\l_tmpa_tl}\par
+  }
 % \clist_map_variable:nNn {B'2,R,r,L,l,U,U2,u,D,d,F,f,B,b,S,M,E,x,y,z} \l_tmpa_tl
 % {
 %   \exp_args:No\CubeNotation{\l_tmpa_tl} % \cubearrows{\l_tmpa_tl}{3mm}
