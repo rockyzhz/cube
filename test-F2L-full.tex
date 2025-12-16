@@ -5,8 +5,20 @@
 \usepackage[most]{tcolorbox}
 \usepackage{array,tabularx,colortbl}
 
-% 自定义颜色
-\definecolor{myblue}{RGB}{222, 244, 255}
+% region 自定义颜色
+\definecolor{myblue}{RGB}{203, 223, 244} % {222, 244, 255}
+\definecolor{f2l}{RGB}{203, 223, 244} % {222, 244, 255}
+\definecolor{oll}{RGB}{242, 218, 193}
+\definecolor{pll}{RGB}{244, 210, 227}
+\definecolor{steps}{RGB}{194, 234, 154}
+% endregion
+
+% region 自定义命令
+\ProvideDocumentCommand{\red}{m}{\textcolor{red}{#1}}
+\ProvideDocumentCommand{\blue}{m}{\textcolor{blue}{#1}}
+\ProvideDocumentCommand{\orange}{m}{\textcolor{orange}{#1}}
+\ProvideDocumentCommand{\green}{m}{\textcolor{nicegreen}{#1}}
+% endregion
 
 % 设置表格线条粗细和内边距
 \setlength\arrayrulewidth{0.3pt}  % 竖隔线细一点
@@ -22,7 +34,6 @@
         width=\textwidth/#2,  % 宽度固定为所有公式宽度
         before={\parindent0pt},
         size=tight,
-        % parskip=0pt, % 两行上下内容之间，不要默认间距，由自己控制
         halign=center,
         height fixed for=all,
         reset and store to box array}}
@@ -30,7 +41,7 @@
 % region 定高盒子的风格
 \tcbset{
     fixedheight/.style={
-        blankest,height=#1,width=\linewidth,halign=center,valign=center}} % 11.3\gfllheight+2pt
+        blanker,height=#1,width=\linewidth,halign=center,valign=center}} % 11.3\gfllheight+2pt
 % endregion
 % region FLL 公式示意图盒子的风格
 \tcbset{
@@ -45,8 +56,6 @@
         boxrule=0.6pt,
         arc=5mm,
         boxsep=0pt,
-        % left=0mm,
-        % right=0mm,
         % 关键：使用tabularx属性直接创建n列表格（默认顶部对齐）
         tabularx={X*{#1}{|X}},  % n列等宽，顶部对齐，带分隔线
         width=\linewidth,}}  % 宽度占满整行
@@ -65,13 +74,11 @@
 
 \keys_define:nn { MultiColsBox }
 {
-    % columns .int_set:N = \l_multicolsbox_columns_int,
     columns .code:n = {
                         \int_set:Nn \l_multicolsbox_columns_int {#1}
                         \int_set:Nn \l_multicolsbox_columns_minusone_int {\int_eval:n {#1 - 1}}
                     },
     columns .default:n = 4,
-    % rows .int_set:N = \l_multicolsbox_rows_int,
     rows .code:n =  {
                         \int_set:Nn \l_multicolsbox_rows_int {#1}
                         \fp_set:Nn \l_multicolsbox_rows_fp {\fp_eval:n {1.02*#1}}
@@ -106,19 +113,19 @@
 \ExplSyntaxOff
 % endregion
 % endregion
-
+% \view{f}
 \begin{document}
 
 \section*{所有 F2L 公式}
 
 \ExplSyntaxOn % 启用LaTeX3语法
+% region 一次性设置序列（用逗号分隔）
 % 定义序列（变量名中不能有数字）
 \seq_new:N \g_cube_notation_all_seq
 \seq_new:N \g_cube_fll_all_seq
 \seq_new:N \g_cube_oll_all_seq
 \seq_new:N \g_cube_pll_all_seq
 
-% region 一次性设置序列（用逗号分隔）
 % region \g_cube_fll_all_seq 设置魔方公式的各种记号解释
 \seq_set_from_clist:Nn \g_cube_notation_all_seq {R,R',R2,r,r',L,l,U,u,D,d,F,f,B,b,S,M,E,x,y,z}
 % endregion
@@ -233,13 +240,13 @@
 
 % region \g_cube_pll_all_seq 设置 PLL 阶段 21 个公式
 \seq_set_from_clist:Nn \g_cube_pll_all_seq {
-    {l-l,uuu,r-r,d-d}{4-8-6-4}{Ua}{\orange{M'2}U\orange{M}U2\\\orange{M'}U\orange{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}, % 01
-    {l-l,uuu,r-r,d-d}{4-6-8-4}{Ub}{\orange{M'2}\blue{U'}\orange{M}U2\\\orange{M'}\blue{U'}\orange{M'2}\\或者\\(R2U)(RU)\\(R'U')2(R'UR')}, % 02
-    {l-l,u-u,r-r,d-d}{2=8,4=6}{H} {\orange{M'2}U\orange{M'2}\\U2\\\orange{M'2}U\orange{M'2}}, % 03
-    {l-l,u-u,r-r,d-d}{2=6,4=8}{Z} {\orange{M'}U\\(\orange{M'2}U)2\\\orange{M'}U2\\\orange{M'2}\blue{U'}}, % 04
-    {-ll,uu,-r,-d   }{3-9-7-3}{Aa}{x'R2\orange{D2}\\(R'\blue{U'}R)\orange{D2}\\(R'UR')}, % 05
+    {l-l,uuu,r-r,d-d}{4-8-6-4}{Ua}{\green{M'2}U\green{M}U2\\\green{M'}U\green{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}, % 01
+    {l-l,uuu,r-r,d-d}{4-6-8-4}{Ub}{\green{M'2}\blue{U'}\green{M}U2\\\green{M'}\blue{U'}\green{M'2}\\或者\\(R2U)(RU)\\(R'U')2(R'UR')}, % 02
+    {l-l,u-u,r-r,d-d}{2=8,4=6}{H} {\green{M'2}U\green{M'2}\\U2\\\green{M'2}U\green{M'2}}, % 03
+    {l-l,u-u,r-r,d-d}{2=6,4=8}{Z} {\green{M'}U\\(\green{M'2}U)2\\\green{M'}U2\\\green{M'2}\blue{U'}}, % 04
+    {-ll,uu,-r,-d   }{3-9-7-3}{Aa}{x'R2\green{D2}\\(R'\blue{U'}R)\green{D2}\\(R'UR')}, % 05
     {-ll,uu,-r,-d   }{3-7-9-3}{Ab}{x'(RU'R)D2\\(R'UR)D2R'2}, % 06
-    {-l,-u,-r,-d    }{1=7,3=9}{E} {x'(R\blue{U'}R'\orange{D})\\(RUR'\orange{D})2\\(R\blue{U'}R'\orange{D'})}, % 07
+    {-l,-u,-r,-d    }{1=7,3=9}{E} {x'(R\blue{U'}R'\green{D})\\(RUR'\green{D})2\\(R\blue{U'}R'\green{D'})}, % 07
     {l-l,uu,-dd     }{3=9,4=6}{T} {(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'\red{F'})}, % 08
     {lll,u,-r,--d   }{2=8,3=9}{F} {(R'\blue{U'}\red{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'UR)}, % 09
     {ll,--u,r,-dd   }{1=9,2=6}{V} {R'URU'R'f'\\(U'RU'2R')\\(\blue{U'}R\blue{U'}R')fR}, % 10
@@ -258,6 +265,7 @@
 % endregion
 % endregion
 
+% region CubeNotation 盒子
 \begin{tcbraster}[
     enhanced,
     size=small,
@@ -273,6 +281,7 @@
     \end{tcolorbox}
   }
 \end{tcbraster}
+% endregion
 
 % 关闭LaTeX3语法以正确解析tcolorbox键名
 \ExplSyntaxOff
@@ -308,4 +317,65 @@
 \end{MultiColsBox}
 % endregion
 % endregion
+
+
+% region CFOP 复原步骤
+\newlength{\stepsgap}
+\setlength{\stepsgap}{.5em}
+\newlength{\stepsunit}
+\setlength{\stepsunit}{2cm}
+\NewCoffin \StepsCoffin
+\SetHorizontalCoffin \StepsCoffin {}
+\NewCoffin \ShortArrow
+\SetHorizontalCoffin \ShortArrow {\tikz{\draw[orange,-{Stealth[length=1.5cm,width=1.5cm,inset=0pt]},line width=6mm] (0,0)--(2.5,0);}}
+\NewCoffin \CrossCoffin
+\SetHorizontalCoffin \CrossCoffin {\view{r}\tikz{\Cube{-r--r----}{-b--b----}{-w-www-w-}[\stepsunit]}}
+\NewCoffin \FLLCoffin
+\SetHorizontalCoffin \FLLCoffin {\tikz{\Cube{---bb}{rr---}{---------}[\stepsunit]}}
+\NewCoffin \OLLCoffin
+\SetHorizontalCoffin \OLLCoffin {\tikz{\Cube{---bb}{rr---}{yyyyyyyyy}[\stepsunit]}}
+\NewCoffin \PLLCoffin
+\SetHorizontalCoffin \PLLCoffin {\tikz{\Cube{bbbbb}{rrrrr}{yyyyyyyyy}[\stepsunit]}}
+
+\JoinCoffins \StepsCoffin[hc,vc] \CrossCoffin[l,vc]
+\JoinCoffins \StepsCoffin[\CrossCoffin-r,\CrossCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\ShortArrow-r,\ShortArrow-vc] \FLLCoffin[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\FLLCoffin-r,\FLLCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\ShortArrow-r,\ShortArrow-vc] \OLLCoffin[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\OLLCoffin-r,\OLLCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\ShortArrow-r,\ShortArrow-vc] \PLLCoffin[l,vc] (\stepsgap,0pt)
+
+\NewCoffin \CrossText
+\NewCoffin \FLLText
+\NewCoffin \OLLText
+\NewCoffin \PLLText
+\SetVerticalCoffin \CrossText {2\stepsunit} {
+    \centering\sffamily\heiti\LARGE
+    \blue{\Huge\bfseries CROSS}\\底层十字}
+\SetVerticalCoffin \FLLText {2\stepsunit} {
+    \centering\sffamily\heiti\LARGE
+    \blue{\Huge\bfseries F2L}\\前两层归位}
+\SetVerticalCoffin \OLLText {2\stepsunit} {
+    \centering\sffamily\heiti\LARGE
+    \blue{\Huge\bfseries OLL}\\最后一层翻色}
+\SetVerticalCoffin \PLLText {2\stepsunit} {
+    \centering\sffamily\heiti\LARGE
+    \blue{\Huge\bfseries PLL}\\最后一层归位}
+
+\ExplSyntaxOn
+\clist_map_variable:nNn {\CrossText,\FLLText,\OLLText,\PLLText} \l_tmpa_tl
+    {
+        \tl_log:N \l_tmpa_tl
+        \expandafter\ScaleCoffin\l_tmpa_tl {3} {3}}
+\ExplSyntaxOff
+
+\JoinCoffins \StepsCoffin[\CrossCoffin-b,\CrossCoffin-hc] \CrossText[t,hc] (0pt, -5\stepsgap)
+\JoinCoffins \StepsCoffin[\FLLCoffin-b,\FLLCoffin-hc] \FLLText[t,hc] (0pt, -5\stepsgap)
+\JoinCoffins \StepsCoffin[\OLLCoffin-b,\OLLCoffin-hc] \OLLText[t,hc] (0pt, -5\stepsgap)
+\JoinCoffins \StepsCoffin[\PLLCoffin-b,\PLLCoffin-hc] \PLLText[t,hc] (0pt, -5\stepsgap)
+
+\ScaleCoffin \StepsCoffin {0.25} {0.25}
+\tcbox[colframe=orange,arc=5mm]{\TypesetCoffin \StepsCoffin}
+% endregion
+
 \end{document}
