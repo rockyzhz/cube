@@ -1,0 +1,512 @@
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{cube-grid}
+\usepackage[most]{tcolorbox}
+\usepackage[margin=.5cm,a4paper,landscape]{geometry}
+\usepackage{array,tabularx,colortbl}
+
+% region 个性化设计
+% region 自定义颜色
+\definecolor{title}{RGB}{34, 98, 163} % {222, 244, 255}
+\definecolor{f2l}{RGB}{203, 223, 244} % {222, 244, 255}
+\definecolor{oll}{RGB}{242, 218, 193}
+\definecolor{pll}{RGB}{244, 210, 227}
+\definecolor{myblue}{RGB}{203, 223, 244}
+\definecolor{steps}{RGB}{243, 251, 240} % {194, 234, 154}
+\definecolor{notation}{RGB}{235, 243, 251}
+% endregion
+
+% region 自定义命令
+\ProvideDocumentCommand{\red}{m}{\textcolor{red}{#1}}
+\ProvideDocumentCommand{\blue}{m}{\textcolor{blue}{#1}}
+\ProvideDocumentCommand{\orange}{m}{\textcolor{orange}{#1}}
+\ProvideDocumentCommand{\green}{m}{\textcolor{nicegreen}{#1}}
+% endregion
+
+% region 设置表格线条粗细和内边距
+\setlength\arrayrulewidth{0.3pt}  % 竖隔线细一点
+\setlength\tabcolsep{2pt}         % 表格内边距为1em
+\pagestyle{empty} % 去掉页眉页脚页码
+% endregion
+% endregion
+
+% region tcolorbox 风格设置
+% region 分页盒子的风格
+\tcbset{
+    pages/.style 2 args={
+        blankest,
+        breakable,
+        break at=#1, % 11个公式一页高度（使用实际测量值）
+        width=\textwidth/#2,  % 宽度固定为所有公式宽度
+        before={\parindent0pt},
+        size=tight,
+        halign=center,
+        height fixed for=all,
+        reset and store to box array}}
+% endregion
+% region 定高盒子的风格
+\tcbset{
+    fixedheight/.style={
+        blanker,height=#1,width=\linewidth,halign=center,valign=center}} % 11.3\gfllheight+2pt
+% endregion
+% region FLL 公式示意图盒子的风格
+\tcbset{
+    fll/.style={
+        enhanced,
+        colback=myblue,
+        colframe=black!70,
+        nobeforeafter,
+        before skip=0pt,
+        before={\parindent0pt},  % 去掉首行缩进
+        after skip=0pt,
+        % frame code={\path[draw=black!70,fill=myblue,rounded corners=5mm,line width=1mm] (frame.south west) rectangle (frame.north east);}
+        % interior code={},
+        % boxrule=1mm,
+        borderline={1mm}{-1pt}{black!70},
+        arc=5mm,
+        boxsep=0pt,
+        % 关键：使用tabularx属性直接创建n列表格（默认顶部对齐）
+        tabularx={X*{#1}{|X}},  % n列等宽，顶部对齐，带分隔线
+        width=\linewidth,}}  % 宽度占满整行
+% endregion
+% region 标题无边框设计
+\tcbset{
+    title without border/.style 2 args={
+        empty,
+        bottomtitle=1ex,
+        grow to left by=-2em,
+        frame code={\path[draw=#1,fill=#2,rounded corners=5mm,line width=1mm] (interior.south west) rectangle (interior.north east);},
+        fonttitle=\sffamily\heiti\bfseries\Large,coltitle=#1
+    }
+}
+% endregion
+\ExplSyntaxOn
+% region 展开函数自定义变种
+\exp_args_generate:n {eN}
+% endregion
+
+% region 定义 MultiColsBox 盒子
+\int_new:N \l_multicolsbox_columns_int
+\int_new:N \l_multicolsbox_columns_minusone_int
+\int_new:N \l_multicolsbox_rows_int
+\box_new:N \l_multicolsbox_box_box
+\seq_new:N \l_multicolsbox_boxarray_seq
+\dim_new:N \l_multicolsbox_height_dim
+\dim_new:N \l_multicolsbox_width_dim
+\dim_new:N \l_multicolsbox_total_width_dim
+\fp_new:N \l_multicolsbox_rows_fp
+\tl_new:N \l_multicolsbox_coffin_tl
+\coffin_new:N \l_multicolsbox_coffin
+\bool_new:N \l_multicolsbox_ifcoffin_bool
+\bool_set_false:N \l_multicolsbox_ifcoffin_bool
+
+\keys_define:nn { MultiColsBox }
+{
+    columns .code:n = {
+                        \int_set:Nn \l_multicolsbox_columns_int {#1}
+                        \int_set:Nn \l_multicolsbox_columns_minusone_int {\int_eval:n {#1 - 1}}
+                    },
+    columns .default:n = 4,
+    rows .code:n =  {
+                        \int_set:Nn \l_multicolsbox_rows_int {#1}
+                        \fp_set:Nn \l_multicolsbox_rows_fp {\fp_eval:n {1.02*#1}}
+                    },
+    rows .value_required:n = true,
+    box .code:n =   {
+                        \box_set_eq:NN \l_multicolsbox_box_box #1
+                        \dim_set:Nn \l_multicolsbox_height_dim {\box_ht_plus_dp:N \l_multicolsbox_box_box}
+                        \dim_set:Nn \l_multicolsbox_width_dim {\box_wd:N \l_multicolsbox_box_box}
+                    },
+    box .value_required:n = true,
+    coffin .code:n = {
+                        \tl_set:Nn \l_multicolsbox_coffin_tl {#1}
+                        \bool_set_true:N \l_multicolsbox_ifcoffin_bool
+                    },
+    width .dim_set:N = \l_multicolsbox_total_width_dim,
+    width .default:n = {\linewidth},
+}
+\NewDocumentEnvironment{MultiColsBox}{ O{} }
+{
+    \keys_set:nn {MultiColsBox} {#1}
+    \begin{tcolorbox}[pages={\dim_eval:n {\fp_use:N \l_multicolsbox_rows_fp \l_multicolsbox_height_dim}}{\int_use:N \l_multicolsbox_columns_int}]
+}
+{
+    \end{tcolorbox}
+    \int_step_inline:nn {\int_use:N \l_multicolsbox_columns_int} {
+        \seq_put_right:Nn \l_multicolsbox_boxarray_seq {
+            \useboxarray{##1}
+        }
+    }
+    \vcoffin_set:Nnn \l_multicolsbox_coffin {\l_multicolsbox_total_width_dim} {
+    \begin{tcolorbox}[fixedheight={\dim_eval:n {\int_use:N \l_multicolsbox_rows_int \l_multicolsbox_height_dim}}]
+        \begin{tcolorbox}[fll={\int_use:N \l_multicolsbox_columns_minusone_int}]
+            % 直接使用储存的页面，顶部对齐
+            \seq_use:Nn \l_multicolsbox_boxarray_seq { & }
+        \end{tcolorbox}
+    \end{tcolorbox}}
+    \bool_log:N \l_multicolsbox_ifcoffin_bool
+    \tl_log:N \l_multicolsbox_coffin_tl
+    \bool_if:NTF \l_multicolsbox_ifcoffin_bool
+        {\exp_args:NeN \coffin_gset_eq:cN {\l_multicolsbox_coffin_tl} \l_multicolsbox_coffin}
+        {\coffin_typeset:Nnnnn \l_multicolsbox_coffin {H} {l} {0pt} {0pt}}
+    \bool_set_false:N \l_multicolsbox_ifcoffin_bool
+}
+\ExplSyntaxOff
+% endregion
+% endregion
+
+\ExplSyntaxOn % 启用LaTeX3语法
+% region 一次性设置序列（用逗号分隔）
+% 定义序列（变量名中不能有数字）
+\seq_new:N \g_cube_notation_all_seq
+\seq_new:N \g_cube_fll_all_seq
+\seq_new:N \g_cube_oll_all_seq
+\seq_new:N \g_cube_pll_all_seq
+
+% region \g_cube_fll_all_seq 设置魔方公式的各种记号解释
+\seq_set_from_clist:Nn \g_cube_notation_all_seq {R,R',R2,r,L,l,U,u,D,d,F,f,B,b,S,M,E,x,y,z}
+% endregion
+
+% region \g_cube_fll_all_seq 设置 F2L 阶段 41 个公式
+\seq_set_from_clist:Nn \g_cube_fll_all_seq {
+    {---rb}{rb---}{---------}{(R\blue{U'}R'U)y'\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}, % 1
+    {-b--b}{r----}{-------r-}{(UR\blue{U'}R'\blue{U'})\\y'(R'UR)}, % 2
+    {----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}, % 3
+    {---bw}{br---}{---------}{(RUR'\blue{U'})\\(RU2R'\blue{U'})\\(RUR')}, % 4
+    {---rw}{bb---}{---------}{(RF)U\\(R\blue{U'}R'\red{F'})\\(\blue{U'}R')或者\\(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'\blue{U})y'R'\blue{U'}R}, % 5
+    {-b--w}{b----}{-------r-}{y'(R'\blue{U'}RU)\\(R'\blue{U'}R)}, % 6
+    {----w}{b--r-}{-----b---}{(R\blue{U'}R'U)\\(R\blue{U'}R')}, % 7
+    {---br}{wr---}{---------}{(R\blue{U'}R'U)\\(R\red{U'}\blue{U'}R'U)\\(R\blue{U'}R')}, % 8
+    {---rr}{wb---}{---------}{(RU)F\\(RUR'\blue{U'})\\\red{F'}R'}, % 9
+    {-b--r}{w----}{-------r-}{y'(R'UR\blue{U'})\\(R'UR)}, % 10
+    {----r}{w--r-}{-----b---}{(RUR'\blue{U'})\\(RUR')}, % 11
+    {--rb-}{-rb--}{--------w}{(RUR'\blue{U'})2\\(RUR')}, % 12
+    {--rr-}{-bb--}{--------w}{(R\blue{U'}R'U)\\y'(R'UR)\\或者\\y'R'UR'FRF'R}, % 13
+    {-br--}{--b--}{-------rw}{y'(R'U2)\\(RUR'\blue{U'}R)}, % 14
+    {--r--}{--b--}{---r----w}{y'\blue{U'}\\(R'U2)\\(R\blue{U'}R'UR)}, % 15
+    {--r--}{--b--}{-r------w}{y'(R'UR\red{U'}\blue{U'})\\(R'\blue{U'}R)\\或者\\\blue{F'}L'U2LF}, % 16
+    {--r--}{--bb-}{-----r--w}{FU\\(R\blue{U'}R'\red{F'})\\(R\blue{U'}R')}, % 17
+    {-rr--}{--b--}{-------bw}{U(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'U)}, % 18
+    {--r--}{--b--}{---b----w}{(R\blue{U'}R'U2)\\(RUR')\\或者\\yFRU2R'\red{F'}}, % 19
+    {--r--}{--b--}{-b------w}{U(R\red{U'}\blue{U'})\\(R'UR\blue{U'}R')}, % 20
+    {--r--}{--br-}{-----b--w}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR')}, % 21
+    {--wb-}{-rr--}{--------b}{\blue{U'}(R\blue{U'}R'U2)\\(R\blue{U'}R')}, % 22
+    {--wr-}{-br--}{--------b}{\blue{U'}(RUR')\\y'(UR'\blue{U'}R)}, % 23
+    {-bw--}{--r--}{-------rb}{y'U\\(R'UR\blue{U'})\\(R'\blue{U'}R)}, % 24
+    {--w--}{--r--}{---r----b}{y'(R'\blue{U'}R)}, % 25
+    {--w--}{--r--}{-r------b}{y'U\\(R'\blue{U'}R\blue{U'})\\(R'\blue{U'}R)}, % 26
+    {--w--}{--rb-}{-----r--b}{y'(R\red{U'}\blue{U'})\\(R'2\blue{U'})\\(R2\blue{U'}R')}, % 27
+    {-rw--}{--r--}{-------bb}{(lU)\\(r\blue{U'}r'\blue{U'})l'}, % 28
+    {--w--}{--r--}{---b----b}{\blue{U'}(R\red{U'}\blue{U'})\\(R'U2)(R\blue{U'}R')\\或者\\y'rU2R'2\\U'R2U'r'}, % 29
+    {--w--}{--r--}{-b------b}{\blue{U'}(RUR'\blue{U'})\\(R\red{U'}\blue{U'}R')}, % 30
+    {--w--}{--rr-}{-----b--b}{UR\blue{U'}R'}, % 31
+    {--bb-}{-rw--}{--------r}{\blue{U'}(R\red{U'}\blue{U'}R'U)\\(RUR')}, % 32
+    {--br-}{-bw--}{--------r}{y'U(R'UR)\\\green{d'}(RUR')\\或者\\U(F'U'F)\\U'(RUR')}, % 33
+    {-bb--}{--w--}{-------rr}{y'\blue{U'}\\(R'UR)}, % 34
+    {--b--}{--w--}{---r----r}{y'U\\(R'\blue{U'}R\red{U'}\blue{U'})\\(R'UR)}, % 35
+    {--b--}{--w--}{-r------r}{y'U\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}, % 36
+    {--b--}{--wb-}{-----r--r}{(R\blue{U'}R'U2)\\y'(R'\blue{U'}R)}, % 37
+    {-rb--}{--w--}{-------br}{(R\blue{U'}R'U)\\(R\blue{U'}R'U2)\\(R\blue{U'}R')}, % 38
+    {--b--}{--w--}{---b----r}{\blue{U'}(RUR'U)\\(RUR')}, % 39
+    {--b--}{--w--}{-b------r}{R U R'}, % 40
+    {--b--}{--wr-}{-----b--r}{\blue{U'}(R\blue{U'}R'U)\\(RUR')} % 41
+}
+% endregion
+
+% region \g_cube_oll_all_seq 设置 OLL 阶段 57 个公式
+\seq_set_from_clist:Nn \g_cube_oll_all_seq {
+    {LURL-RLDR}{(R\red{U'}\blue{U'})\\(R'2FR\red{F'})\\U2(R'FR\red{F'})}, % 01
+    {LUUL-RLDD}{F(RUR'\blue{U'})\red{F'}\\f(RUR'\blue{U'})\red{f'}}, % 02
+    {UURL-RLD-}{f(RUR'\blue{U'})\red{f'}\\\blue{U'}\\F(RUR'\blue{U'})\red{F'}}, % 03
+    {LU-L-RDDR}{f(RUR'\blue{U'})\red{f'}\\\red{f'}U\\F(RUR'\blue{U'})\red{F'}}, % 04
+    {UURL--L--}{(r'U2)\\(RUR'U)r\\或者\\y2l'U2L\\UL'Ul}, % 05
+    {L--L--DDR}{(r\red{U'}U')\\(R'\blue{U'}R\blue{U'}r')\\或者\\y2lU2L'U'\\LU'l'}, % 06
+    {U-R--R-DD}{(rUR'U)\\(R\red{U'}\blue{U'}r')\\或者\\y2l2UL'U\\LU2l'}, % 07
+    {-UU--RD-R}{(r'\blue{U'}R\blue{U'})\\(R'U2r)\\或者\\y2l'U'LU'\\L'U2l}, % 08
+    {L-U--RDD-}{(RUR'\blue{U'})\\(R'F)\\(R2UR'\blue{U'})\red{F'}}, % 09
+    {UU---RL-D}{(RUR'\green{U})\\(R'FR\red{F'})\\(R\red{U'}\blue{U'}R')}, % 10
+    {UURL----D}{(r'R2UR'U)\\(R\red{U'}\blue{U'}R'U)\\green{M'}}, % 11
+    {--UL--DDR}{\green{M'}(R'\blue{U'}R\blue{U'})\\(R'U2R\blue{U'})M}, % 12
+    {LUU---LDD}{f(RU)\\(R2\blue{U'})\\(R'UR\blue{U'})\green{f'}}, % 13
+    {LUU---DD-}{(R'F)\\(RUR'\red{F'}R)\\(F\blue{U'}\red{F'})}, % 14
+    {UUR---LD-}{(r'\blue{U'}r)\\(R'\blue{U'}RU)\\(r'Ur)}, % 15
+    {LU----DDR}{(rUr')\\(RUR'\blue{U'})\\(r\blue{U'}r')}, % 16
+    {-UUL-RLD-}{(RUR'U)\\(R'FRF')\\U2(R'FRF')}, % 17
+    {-U-L-RDDD}{(rUR'U)\\(R\red{U'}\blue{U'}r')\\(r'\blue{U'}R\blue{U'})\\(R'U2r)}, % 18
+    {-U-L-RLDR}{(r'RU)\\(RUR'\blue{U'}r)\\(R'2FR\red{F'})}, % 19
+    {-U-L-R-D-}{(rUR'\blue{U'})\\\green{M'2}U\\(R\blue{U'}R'\blue{U'})\green{M'}}, % 20
+    {U-U---D-D}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR'\blue{U'})\\(R\blue{U'}R')}, % 21
+    {R-U---R-D}{(R\red{U'}\blue{U'})\\(R'2\blue{U'})(R2\blue{U'})\\(R'2\blue{U'})(\blue{U'}R)}, % 22
+    {U-U------}{(R'2\green{D'})\\(R\red{U'}\blue{U'}R'D)\\(R\green{U'}\blue{U'}R)}, % 23
+    {U-----D--}{(rUR'\blue{U'})\\(r'FR\red{F'})}, % 24
+    {L-------D}{\red{F'}(rUR'\blue{U'})\\(r'FR)}, % 25
+    {L-----D-R}{(R\red{U'}\blue{U'})\\(R'\blue{U'}R\blue{U'}R')\\或者\\y'R'U'RU'\\RU2R'}, % 26
+    {U-R-----D}{(RUR'\green{U})\\(R\red{U'}\blue{U'}R')\\或者\\y'R'U2R\\UR'UR}, % 27
+    {-----R-D-}{(rUR'\blue{U'})\\(r'RU)\\(R\blue{U'}R')}, % 28
+    {U----RDD-}{(RUR'\blue{U'})\\(R\blue{U'}R'\red{F'}\blue{U'}F)\\(RUR')}, % 29
+    {-U-L--L-R}{f(RU)\\(R2\blue{U'}R'U)\\(R2\blue{U'}R')\red{f'}}, % 30
+    {-UU--R--D}{R'FRUR'\\U'F2UFR}, % 31
+    {UU-L--D--}{(RU)(\red{B'}\blue{U'})\\(R'URBR')\\或者\\S(RUR'U')\\(R'FRf')}, % 32
+    {UU----DD-}{(RUR'\blue{U'})\\(R'FR\red{F'})}, % 33
+    {LUR----D-}{(RUR2\blue{U'})\\(R'F)\\(RUR\blue{U'}\green{F'})}, % 34
+    {-URL--D--}{(R\red{U'}\blue{U'})\\(R'2FR\red{F'})\\(R\red{U'}\blue{U'}R')}, % 35
+    {-UR--RD--}{(R'\blue{U'}R\blue{U'})\\(R'URU)\\(l\blue{U'}R'U)}, % 36
+    {--R--RDD-}{F(R\blue{U'}R'\blue{U'})\\(RUR'\red{F'})}, % 37
+    {U----R-DR}{(RUR'U)\\(R\blue{U'}R'\blue{U'})\\(R'FR\red{F'})}, % 38
+    {LU-----DD}{(RUR'\red{F'}\blue{U'}F)\\U(RU2R')}, % 39
+    {-UU---LD-}{(R'F)\\(RUR'\blue{U'})\\\red{F'}(UR)}, % 40
+    {U-U--R-D-}{(RUR'\green{U})\\(R\red{U'}\blue{U'}R')F\\(RUR'\blue{U'})\red{F'}}, % 41
+    {-U---RD-D}{(R'\blue{U'}R\blue{U'})\\(R'U2R)F\\(RUR'\blue{U'})\red{F'}}, % 42
+    {-UR--R--R}{(\red{B'}\blue{U'})\\(R'URB)\\或者\\f'(L'U'LU)f}, % 43
+    {LU-L--L--}{(f(RUR'\blue{U'})\red{f'})}, % 44
+    {LU----LD-}{F(RUR'\blue{U'})\red{F'}}, % 45
+    {--RL-R--R}{(R'\blue{U'})\\(R'FR\red{F'})\\(UR)}, % 46
+    {U-RL--DDR}{\red{b'}(\blue{U'}R'UR)2b\\或者\\F'(L'U'LU)2F}, % 47
+    {L-U--RLDD}{F(RUR'\blue{U'})2\red{F'}}, % 48
+    {UUR--RD-R}{(R\red{B'})\\(R'2FR2B)\\(R'\red{F'}R)}, % 49
+    {LUUL--L-D}{(r'U)\\(r2\blue{U'}r'2\blue{U'})\\(r2Ur')}, % 50
+    {LUU---LDD}{f(RUR'\blue{U'})2\red{f'}}, % 51
+    {L-UL-RL-D}{(R'\red{F'}\blue{U'}F\blue{U'})\\(RUR'\green{U}R)}, % 52
+    {UUU--RD-D}{(r'U2)\\(RUR'\blue{U'})\\(RUR'Ur)}, % 53
+    {U-U--RDDD}{(r\red{U'}\blue{U'})\\(R'\blue{U'}RU)\\(R'\blue{U'}R\blue{U'}r')}, % 54
+    {UUU---DDD}{(r\red{U'}\blue{U'}R'\blue{U'})\\(r'R2UR'\blue{U'})\\(r\blue{U'}r')}, % 55
+    {-U-----D-}{(RUR'\blue{U'})\\\green{M'}(UR\blue{U'}r')}, % 57
+    {LUR---LDR}{(rUr')\\(UR\blue{U'}R')2\\(r\blue{U'}r')\\或者\\(fRUR'U'F')\\(RUR'U')\\(R'F'Rf')}, % 56
+}
+% endregion
+
+% region \g_cube_pll_all_seq 设置 PLL 阶段 21 个公式
+\seq_set_from_clist:Nn \g_cube_pll_all_seq {
+    {l-l,uuu,r-r,d-d}{4-8-6-4}{Ua}{\green{M'2}U\green{M}U2\\\green{M'}U\green{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}, % 01
+    {l-l,uuu,r-r,d-d}{4-6-8-4}{Ub}{\green{M'2}\blue{U'}\green{M}U2\\\green{M'}\blue{U'}\green{M'2}\\或者\\(R2U)(RU)\\(R'U')2(R'UR')}, % 02
+    {l-l,u-u,r-r,d-d}{2=8,4=6}{H} {\green{M'2}U\green{M'2}\\U2\\\green{M'2}U\green{M'2}}, % 03
+    {l-l,u-u,r-r,d-d}{2=6,4=8}{Z} {\green{M'}U\\(\green{M'2}U)2\\\green{M'}U2\\\green{M'2}\blue{U'}}, % 04
+    {-ll,uu,-r,-d   }{3-9-7-3}{Aa}{x'R2\green{D2}\\(R'\blue{U'}R)\green{D2}\\(R'UR')}, % 05
+    {-ll,uu,-r,-d   }{3-7-9-3}{Ab}{x'(RU'R)D2\\(R'UR)D2R'2}, % 06
+    {-l,-u,-r,-d    }{1=7,3=9}{E} {x'(R\blue{U'}R'\green{D})\\(RUR'\green{D})2\\(R\blue{U'}R'\green{D'})}, % 07
+    {l-l,uu,-dd     }{3=9,4=6}{T} {(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'\red{F'})}, % 08
+    {lll,u,-r,--d   }{2=8,3=9}{F} {(R'\blue{U'}\red{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'UR)}, % 09
+    {ll,--u,r,-dd   }{1=9,2=6}{V} {R'URU'R'f'\\(U'RU'2R')\\(\blue{U'}R\blue{U'}R')fR}, % 10
+    {rr,-dd         }{1=9,2=4}{Y} {F(R\blue{U'}R'\blue{U'})\\(RuR'\red{F'})\\(RuR'\blue{U'})\\(R'FR\red{F'})}, % 11
+    {-ll,uuu,r      }{6=8,7=9}{Ja}{z(\blue{U'}R\red{D'})\\(R2UR'\blue{U'})\\(R2U)\\(\red{D}R')}, % 12
+    {lll,uu,--d     }{3=9,6=8}{Jb}{(RUR'\blue{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})}, % 13
+    {ll,-u,--r,d-d  }{1=3,6=8}{Rb}{(R'U2)\\(R\red{U'}\blue{U'})\\(R'FRUR'\blue{U'})\\(R'\red{F'}R2\blue{U'})}, % 14
+    {l-l,-uu,-r,-dd }{2=4,3=9}{Ra}{(R\blue{U'}R'\blue{U'})\\(RUR\red{D})\\(R'\blue{U'}R\red{D'})\\(R'U2R'\blue{U'})}, % 15
+    {l-l,-uu        }{1-7-9-1,4-6-8-4}{Gc}{(R'2\blue{u'}R\red{U'}R)\\(UR'u)\\(R2fR'\red{f'})}, % 16
+    {l-l,-rr        }{1-3-7-1,2-4-6-2}{Gd}{(RUR')y'\\(R2\red{u'}R\blue{U'})\\(R'UR'uR2)}, % 17
+    {l-l,dd         }{1-3-7-1,2-4-6-2}{Ga}{R2UR'UR'\\U'RU'R2\\(U'D)R'UR\\(D'U)}, % 18
+    {l-l,rr         }{1-7-9-1,2-8-4-2}{Gb}{(R'd'F)\\(R2u)\\(R'U)\\(R\red{U'}R\blue{u'}R'2)}, % 19
+    {l,-uu,r,-dd    }{1=9,4=6}{Nb}{(R'UR\blue{U'})\\(R'\red{F'}\blue{U'})\\(FRUR'F)\\(R'\red{F'}R\blue{U'}R)}, % 20
+    {--l,uu,--r,dd  }{3=7,4=6}{Na}{(RUR'\red{U})\\(RUR'\blue{F'})\\(RUR'\blue{U'})(R'F)\\(R2\blue{U'}R'U2)\\(R\blue{U'}R')}, % 21
+}
+% endregion
+% endregion
+\ExplSyntaxOff % 启用LaTeX3语法
+
+% \view{f} 正面斜 45度视角
+\begin{document}
+
+% region 标题
+\NewCoffin \PageOne
+\SetHorizontalCoffin \PageOne {}
+
+\NewCoffin \TitleCoffin
+\NewCoffin \LogoCoffin
+\NewCoffin \TitleTextCoffin
+\SetHorizontalCoffin \TitleCoffin {}
+\SetHorizontalCoffin \LogoCoffin {\CubeLogo}
+\SetVerticalCoffin \TitleTextCoffin {8cm} {{
+    \raggedright\bfseries\sffamily\heiti\huge\color{title}
+    三阶魔方{\Huge\bfseries}~CFOP~教程\\[1ex]
+    $3\times3$ CFOP TUTORIAL
+}}
+\JoinCoffins \TitleCoffin [l,vc] \LogoCoffin [l,vc]
+\JoinCoffins \TitleCoffin [\LogoCoffin-r,\LogoCoffin-vc] \TitleTextCoffin [l,vc] (2em,-1ex)
+% endregion
+
+% 把 \TitleCoffin 安装到 \PageOne 里
+\JoinCoffins \PageOne [l,t] \TitleCoffin [l,t]
+
+% region CFOP 复原步骤
+\newlength{\stepsgap}
+\setlength{\stepsgap}{.5em}
+\newlength{\stepsunit}
+\setlength{\stepsunit}{1.5cm}
+\NewCoffin \StepsCoffin
+\SetHorizontalCoffin \StepsCoffin {}
+\NewCoffin \ShortArrow
+\SetHorizontalCoffin \ShortArrow {\tikz{\draw[orange,-{Stealth[length=1.5cm,width=1.5cm,inset=0pt]},line width=6mm] (0,0)--(2.5,0);}}
+\NewCoffin \CrossStepCoffin
+\SetHorizontalCoffin \CrossStepCoffin {\view{r}\tikz{\Cube{-r--r----}{-b--b----}{-w-www-w-}[\stepsunit]}}
+\NewCoffin \FLLStepCoffin
+\SetHorizontalCoffin \FLLStepCoffin {\tikz{\Cube{---bb}{rr---}{---------}[\stepsunit]}}
+\NewCoffin \OLLStepCoffin
+\SetHorizontalCoffin \OLLStepCoffin {\tikz{\Cube{---bb}{rr---}{yyyyyyyyy}[\stepsunit]}}
+\NewCoffin \PLLStepCoffin
+\SetHorizontalCoffin \PLLStepCoffin {\tikz{\Cube{bbbbb}{rrrrr}{yyyyyyyyy}[\stepsunit]}}
+
+\JoinCoffins \StepsCoffin[hc,vc] \CrossStepCoffin[l,vc]
+\JoinCoffins \StepsCoffin[\CrossStepCoffin-r,\CrossStepCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\ShortArrow-r,\ShortArrow-vc] \FLLStepCoffin[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\FLLStepCoffin-r,\FLLStepCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\ShortArrow-r,\ShortArrow-vc] \OLLStepCoffin[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\OLLStepCoffin-r,\OLLStepCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
+\JoinCoffins \StepsCoffin[\ShortArrow-r,\ShortArrow-vc] \PLLStepCoffin[l,vc] (\stepsgap,0pt)
+
+\NewCoffin \CrossText
+\NewCoffin \FLLText
+\NewCoffin \OLLText
+\NewCoffin \PLLText
+\SetVerticalCoffin \CrossText {2.2\stepsunit} {
+    \centering\sffamily\heiti\Large
+    \blue{\huge\bfseries CROSS}\\底层十字}
+\SetVerticalCoffin \FLLText {2.2\stepsunit} {
+    \centering\sffamily\heiti\Large
+    \blue{\huge\bfseries F2L}\\前两层归位}
+\SetVerticalCoffin \OLLText {2.2\stepsunit} {
+    \centering\sffamily\heiti\Large
+    \blue{\huge\bfseries OLL}\\最后一层翻色}
+\SetVerticalCoffin \PLLText {2.2\stepsunit} {
+    \centering\sffamily\heiti\Large
+    \blue{\huge\bfseries PLL}\\最后一层归位}
+
+\ExplSyntaxOn
+\clist_map_variable:nNn {\CrossText,\FLLText,\OLLText,\PLLText} \l_tmpa_tl
+    {
+        \tl_log:N \l_tmpa_tl
+        \expandafter\ScaleCoffin\l_tmpa_tl {3} {3}}
+\ExplSyntaxOff
+
+\JoinCoffins \StepsCoffin[\CrossStepCoffin-b,\CrossStepCoffin-hc] \CrossText[t,hc] (0pt, -5\stepsgap)
+\JoinCoffins \StepsCoffin[\FLLStepCoffin-b,\FLLStepCoffin-hc] \FLLText[t,hc] (0pt, -5\stepsgap)
+\JoinCoffins \StepsCoffin[\OLLStepCoffin-b,\OLLStepCoffin-hc] \OLLText[t,hc] (0pt, -5\stepsgap)
+\JoinCoffins \StepsCoffin[\PLLStepCoffin-b,\PLLStepCoffin-hc] \PLLText[t,hc] (0pt, -5\stepsgap)
+
+\ScaleCoffin \StepsCoffin {0.25} {0.25}
+\NewCoffin \StepsBoxCoffin
+\SetHorizontalCoffin \StepsBoxCoffin{
+    \tcbox[title without border={orange}{steps},title={CFOP 复原步骤}]{\TypesetCoffin \StepsCoffin}}
+% endregion
+
+% 把 \StepsBoxCoffin 安装到 \PageOne 里
+\JoinCoffins \PageOne [\LogoCoffin-l,\LogoCoffin-b] \StepsBoxCoffin [l,t] (.5em,-1ex)
+
+% region CubeNotation 盒子
+\ExplSyntaxOn
+\NewCoffin \NotationCoffin
+\SetHorizontalCoffin \NotationCoffin {
+\begin{tcolorbox}[
+    title~without~border={nicered}{notation},
+    title=魔方转动公式符号及示意图,
+    % width=\textwidth-\CoffinWidth\PageOne-1cm,
+    % width=7\gnotationwidth,
+    width=\CoffinWidth\PageOne-1.1cm,
+    height=\textheight-\CoffinTotalHeight\PageOne,
+    ]
+    \begin{tcbraster}[
+        enhanced,
+        size=small,
+        attach~boxed~title~to~top~left,
+        raster~columns=5,
+        raster~equal~height,
+        raster~row~skip=-1ex,
+        % raster~row~skip=(\textheight-4\gnotationheight-3cm)/3,
+        ]
+        \seq_map_variable:NNn \g_cube_notation_all_seq \l_tmpa_tl
+            {
+                \begin{tcolorbox}[blankest,size=tight]
+                    \exp_args:No\CubeNotation{\l_tmpa_tl}
+                \end{tcolorbox}}
+    \end{tcbraster}
+\end{tcolorbox}
+}
+\ExplSyntaxOff
+% endregion
+
+
+% \ExplSyntaxOn
+% \dim_log:n {\CoffinWidth\TitleCoffin}
+% \dim_to_decimal_in_cm:n {\CoffinWidth\TitleCoffin}
+% \ExplSyntaxOff
+
+% 把 \NotationCoffin 安装到 \PageOne 里
+\JoinCoffins \PageOne [\StepsBoxCoffin-b,\StepsBoxCoffin-l] \NotationCoffin [l,t] (.5em, -1ex)
+% \JoinCoffins \PageOne [t,r] \NotationCoffin [l,t] (1em, 0pt)
+
+% region F2L 公式页面
+\NewCoffin \FLLCoffin
+\begin{MultiColsBox}[
+    columns=5,
+    rows=10,
+    box={\gcubefllbox},
+    coffin={FLLCoffin},
+    width=\textwidth-\CoffinWidth\PageOne+1cm,
+    ]
+\ExplSyntaxOn
+\seq_map_variable:NNn \g_cube_fll_all_seq \l_tmpa_tl {
+    \hbox{\exp_after:wN\FLL\l_tmpa_tl}
+}
+\ExplSyntaxOff
+\end{MultiColsBox}
+% endregion
+
+% 把 \FLLCoffin 安装到 \PageOne 里
+\JoinCoffins \PageOne [r,t] \FLLCoffin [l,t] (.5em, -.8cm)
+
+
+% 输出 \PageOne 
+\TypesetCoffin \PageOne (-2cm,1cm)
+\ClearCoffin \PageOne
+
+% \PageTwo
+\NewCoffin \PageTwo
+\SetHorizontalCoffin \PageTwo {}
+
+% region OLL 公式页面
+\NewCoffin \OLLCoffin
+\begin{MultiColsBox}[
+    columns=9,
+    rows=7,
+    box={\gcubeollbox},
+    coffin={OLLCoffin},
+    width=\textwidth,
+    ]
+\ExplSyntaxOn
+\seq_map_variable:NNn \g_cube_oll_all_seq \l_tmpa_tl {
+    \hbox{\exp_after:wN\OLL\l_tmpa_tl}
+}
+\ExplSyntaxOff
+\end{MultiColsBox}
+% endregion
+
+% 把 \OLLCoffin 安装到 \PageTwo 里
+\JoinCoffins \PageTwo [l,t] \OLLCoffin [l,t] % (0pt, -1cm)
+% \TypesetCoffin  \OLLCoffin
+% \ClearCoffin    \OLLCoffin
+
+% region PLL 公式页面
+\NewCoffin \PLLCoffin
+\begin{MultiColsBox}[
+    columns=7,
+    rows=3,
+    box={\gcubepllbox},
+    coffin={PLLCoffin},
+    width=\textwidth,
+    % width=\linewidth-\CoffinWidth\PageOne-1cm,
+    ]
+\ExplSyntaxOn
+\seq_map_variable:NNn \g_cube_pll_all_seq \l_tmpa_tl {
+    \hbox{\exp_after:wN\PLL\l_tmpa_tl}
+}
+\ExplSyntaxOff
+\end{MultiColsBox}
+% endregion
+
+% 把 \PLLCoffin 安装到 \PageTwo 里
+\JoinCoffins \PageTwo [\OLLCoffin-l,\OLLCoffin-b] \PLLCoffin [l,t] (0pt, -1ex)
+
+
+% 输出 \PageTwo 
+\TypesetCoffin \PageTwo  (-.8cm,1.5cm)
+
+\end{document}
