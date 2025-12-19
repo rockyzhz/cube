@@ -1,5 +1,6 @@
 \documentclass{ctexart}
 \usepackage{zhlipsum}
+\usepackage{enumitem}
 \usepackage[most]{tcolorbox}
 \usepackage{cube-grid}
 \usetikzlibrary{3d}
@@ -8,20 +9,47 @@
     fixedheight/.style={
         blankest,height=#1,width=\linewidth,halign=center,valign=center,
 }} % 11.3\gfllheight+2pt
+
+% region 个性化设计
+% region 自定义颜色
+\definecolor{title}{RGB}{34, 98, 163} % {222, 244, 255}
+\definecolor{f2l}{RGB}{203, 223, 244} % {222, 244, 255}
+\definecolor{oll}{RGB}{242, 218, 193}
+\definecolor{pll}{RGB}{244, 210, 227}
+\definecolor{myblue}{RGB}{203, 223, 244}
+\definecolor{steps}{RGB}{243, 251, 240} % {194, 234, 154}
+\definecolor{notation}{RGB}{235, 243, 251}
+% endregion
+
+% region 自定义命令
+\ProvideDocumentCommand{\red}{m}{\textcolor{red}{#1}}
+\ProvideDocumentCommand{\blue}{m}{\textcolor{blue}{#1}}
+\ProvideDocumentCommand{\orange}{m}{\textcolor{orange}{#1}}
+\ProvideDocumentCommand{\green}{m}{\textcolor{nicegreen}{#1}}
+% endregion
+
+% region 设置表格线条粗细和内边距
+\setlength\arrayrulewidth{0.3pt}  % 竖隔线细一点
+\setlength\tabcolsep{2pt}         % 表格内边距为1em
+\pagestyle{empty} % 去掉页眉页脚页码
+% endregion
+% endregion
+
 % \view{f}
 \begin{document}
-\ExplSyntaxOn
-% \tl_set:Nn \l_tmpa_tl {\exp_not:N\PLLCoffin}
-\NewDocumentCommand{\showresult}{ m }{
-    \str_set:Nn \l_tmpa_str {#1}
-    \str_set:Ne \l_tmpb_str {\str_tail:N\l_tmpa_str}
-    \str_log:N \l_tmpa_str
-    \str_log:N \l_tmpb_str
-}
-\ExplSyntaxOff
-\showresult{\PLLCoffin}
+% \ExplSyntaxOn
+% % \tl_set:Nn \l_tmpa_tl {\exp_not:N\PLLCoffin}
+% \NewDocumentCommand{\showresult}{ m }{
+%     \str_set:Nn \l_tmpa_str {#1}
+%     \str_set:Ne \l_tmpb_str {\str_tail:N\l_tmpa_str}
+%     \str_log:N \l_tmpa_str
+%     \str_log:N \l_tmpb_str
+% }
+% \ExplSyntaxOff
+% \showresult{\PLLCoffin}
 
-1234
+% 1234
+
 % \CubeLogo
 % \CubeLogo[2]
 % \CubeLogo[3]
@@ -114,7 +142,7 @@
 % %   % \end{tikzpicture}
 % %   \par
 % % }
-\CubeNotation{R}
+% \CubeNotation{R}
 % \OLL{LURL-RLDR}{(R\red{U'}\blue{U'})\\(R'2FR\red{F'})\\U2(R'FR\red{F'})}
 
 % % \gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {lll,u-u,dd,-rr} {6-8-2-6,7=9}
@@ -123,7 +151,94 @@
 % %   \drawsquares{scale=2}{lllllllll}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
 % % \end{tikzpicture}
 
-% \PLL{l-l,uuu,r-r,d-d}{4-8-6-4}{Ua}{\orange{M'2}U\orange{M}U2\\\orange{M'}U\orange{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}
+% \PLL{l-l,uuu,r-r,d-d}{4-8-6-4,1=3,7=9}{Ua}{\orange{M'2}U\orange{M}U2\\\orange{M'}U\orange{M'2}\\或者\\(RU'R)(UR)2\\(U'R'U'R'2)}
+
+% \tikz{\Cube{---bb}{rr---}{---------}[1.5cm]}
+
+% \sffamily\rule{1pt}{2ex}01x
+
+\tcbox
+    [
+    enhanced,
+    width=90pt,
+    arc=5mm,
+    boxsep=0em,
+    leftupper=2mm,
+    rightupper=1mm,
+    frame code={\draw[black!70,rounded corners=5mm,line width=1mm] (frame.south west) -- ([yshift=-5mm]frame.north west) -- ([yshift=-5mm]frame.north east) -- (frame.north east);},
+    interior code={\fill[red] ([xshift=.5mm,yshift=-1.5mm]frame.south west) [rounded corners=4.5mm] -- ([xshift=.5mm,yshift=-5.5mm]frame.north west) [rounded corners=5.5mm] -- ([xshift=.5mm,yshift=-5.5mm]frame.north east) [sharp corners] -- ([xshift=.5mm]frame.north east) -- ([xshift=2mm]frame.north east) -- ([xshift=2mm,yshift=-1.5mm]frame.south east) -- cycle;}
+    ]{\hbox{\rlap{\rule{0pt}{15mm}}\rule{30mm}{0pt}}}
+    % [
+    % enhanced,
+    % % colback=myblue,
+    % width=90pt,
+    % % boxrule=1mm,
+    % arc=5mm,
+    % boxsep=0em,
+    % leftupper=2mm,
+    % rightupper=1mm,
+    % % bottomrule=0mm,
+    % frame code={\draw[black,line width=1mm] (frame.south west) [rounded corners=5mm] -- (frame.north west) [rounded corners=5mm] -- (frame.north east) [sharp corners] -- (frame.south east);},
+    % interior code={\fill[myblue] (interior.south west |- frame.south west) [rounded corners=5mm] -- (interior.north west) [rounded corners=5mm] -- (interior.north east) [sharp corners] -- (interior.south east |- frame.south east) -- cycle;},
+    % % sharp corners=south,
+    % ]
+    % \raggedright\sffamily\heiti
+    % \Large\bfseries
+    % PLL\\
+    % \large
+    % 最后一层归位
+% \end{tcolorbox}
+\begin{tcolorbox}
+    % [
+    % enhanced,
+    % colback=myblue,
+    % width=90pt,
+    % boxrule=1mm,
+    % arc=5mm,
+    % boxsep=0em,
+    % leftupper=2mm,
+    % rightupper=1mm,
+    % bottomrule=0mm,
+    % % frame code={\draw[black,line width=1mm] (frame.south west) [rounded corners=5mm] -- (frame.north west) [rounded corners=5mm] -- (frame.north east) [sharp corners] -- (frame.south east);},
+    % % interior code={\fill[myblue] (interior.south west |- frame.south west) [rounded corners=5mm] -- (interior.north west) [rounded corners=5mm] -- (interior.north east) [sharp corners] -- (interior.south east |- frame.south east) -- cycle;},
+    % sharp corners=south,
+    % ]
+    [
+    enhanced,
+    width=90pt,
+    arc=5mm,
+    boxsep=0em,
+    leftupper=2mm,
+    rightupper=1mm,
+    frame code={\draw[black,fill=myblue,line width=1mm] (frame.south west) [rounded corners=5mm] -- (frame.north west) [rounded corners=5mm] -- (frame.north east) [sharp corners] -- (frame.south east);},
+    interior code={\fill[myblue] ([yshift=-1cm]interior.south west |- frame.south west) [rounded corners=4.5mm] -- (interior.north west) [rounded corners=4.5mm] -- (interior.north east) [sharp corners] -- ([yshift=-1cm]interior.south east |- frame.south east) -- cycle;},
+    ]
+    \raggedright\sffamily\heiti
+    \Large\bfseries
+    PLL\\
+    \large
+    最后一层归位\\[1cm]
+    \footnotesize\mdseries
+    OLL和PLL是俯视图
+    \renewcommand\descriptionlabel[1]{\textsf{#1：}\hspace{\labelsep}}
+    \begin{description}[left=0pt,itemindent=-18pt,labelsep=0pt,rightmargin=2em]
+        \item[OLL] 蓝块和小蓝条表示黄色块
+        \item[PLL] 小黑条表示已归位的色块
+    \end{description}
+    \mbox{}\\[2cm]
+    \raisebox{-2ex}{\tikz[radius=1cm,scale=0.25]{\fill[orange] (0,0) -- (0,2) -- (5,2) arc[start angle=90,end angle=-90] -- cycle node[white,anchor=west,above right=2pt]{温馨提示};}}\dotfill
+\end{tcolorbox}
+
+\ExplSyntaxOn
+\dim_to_decimal:n {1mm}
+% \seq_new:N \l_multicolsbox_keyvals_seq
+% \seq_put_right:Nn \l_multicolsbox_keyvals_seq {sharp corners=northeast}
+% \seq_map_inline:Nn \l_multicolsbox_keyvals_seq {}
+\ExplSyntaxOff
+
+% \begin{tikzpicture}
+%     \draw[rounded corners=5] (0,0) rectangle (3,2);
+% \end{tikzpicture}
 
 % % \ExplSyntaxOff
 % % \vspace{2ex}\par
