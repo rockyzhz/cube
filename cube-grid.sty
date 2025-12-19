@@ -17,7 +17,7 @@
 % region 定义颜色
 \definecolor{niceblue}{RGB}{21, 108, 184} % {0, 103, 192} % {17, 68, 99} % {58, 93, 132}
 \definecolor{nicered} {RGB}{235, 51, 36}
-\definecolor{nicegreen}{RGB}{93, 199, 62}
+\definecolor{nicegreen}{RGB}{36, 82, 10} % {93, 199, 62}
 \colorlet{niceyellow}{yellow!80!orange!90!black}
 % endregion
 
@@ -78,28 +78,21 @@
 \NewDocumentCommand{\CubeLogo}{ O{1} }{{ % 加一层 {} ，让 \view{i} 的影响范围仅限于本命令自身
     \view{a}
     \heiti
-    % \edef\logoScaleFactor{\fpeval{2.5 * #1}}
-    \edef\logoScaleFactor{\fpeval{2.5}}
     \scalebox{#1}{
     \begin{tikzpicture}[3d cube={1cm}]
         \begin{scope}[canvas is zx plane at y=1,rotate=90]
             \draw[black!10,fill=niceyellow] (0,0) rectangle (1,1);
-            \node[transform shape] at (.5,.5) {\scalebox{\logoScaleFactor}{魔}};
+            \node[transform shape,inner sep=5pt] at (.5,.5) {\scalebox{2.5}{魔}};
         \end{scope}
         \begin{scope}[canvas is xy plane at z=0]
             \draw[black!10,fill=niceblue] (0,0) rectangle (1,1);
-            \node[transform shape] at (.5,.5) {\scalebox{\logoScaleFactor}{方}};
+            \node[transform shape,inner sep=5pt] at (.5,.5) {\scalebox{2.5}{方}};
         \end{scope}
         \begin{scope}[canvas is yz plane at x=1,rotate=-90]
             \drawsquares[scale={\fpeval{1/3}}]{rorororor}
             % \draw[fill=nicered] (0,0) rectangle (1,1);
-            % \node[transform shape] at (.5,.5) {\scalebox{\logoScaleFactor}{块}};
+            % \node[transform shape,inner sep=5pt] at (.5,.5) {\scalebox{2.5}{块}};
         \end{scope}
-%         \begin{scope}[canvas is yz plane at x=1,rotate=-90]
-%             \drawsquares[scale={\fpeval{1/3}}]{rorororor}
-%             % \draw[fill=nicered] (0,0) rectangle (1,1);
-%             % \node[transform shape] at (.5,.5) {\scalebox{\logoScaleFactor}{块}};
-%         \end{scope}
     \end{tikzpicture}
 }}}
 % endregion
@@ -186,10 +179,10 @@
                                 {\str_set:Nn \l_tmpa_str {##1}}
                             \str_set:Nn \l_tmpb_str {}      % 内容置为空
                         }
-                { [U] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int + 1.1) -- +(0.9,0);}
-                { [D] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int - 0.1) -- +(0.9,0);}
-                { [L] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int - 0.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
-                { [R] }{\draw[niceblue,line~width=3*\pgflinewidth] (\l_cube_tmpc_int + 1.1, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
+                { [U] }{\draw[niceblue,line~width=2*\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int + 1.15) -- +(0.9,0);}
+                { [D] }{\draw[niceblue,line~width=2*\pgflinewidth] (\l_cube_tmpc_int + 0.05, 2 - \l_cube_tmpb_int - 0.15) -- +(0.9,0);}
+                { [L] }{\draw[niceblue,line~width=2*\pgflinewidth] (\l_cube_tmpc_int - 0.15, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
+                { [R] }{\draw[niceblue,line~width=2*\pgflinewidth] (\l_cube_tmpc_int + 1.15, 2 - \l_cube_tmpb_int + 0.05) -- +(0,0.9);}
             }
             {##1}
             
@@ -200,11 +193,11 @@
 
             % 绘制正方形（1cm边长，填充对应颜色，白色描边，2pt线宽）
             % 注意：Y坐标需要反转（第一行在顶部）
-            \bool_if:NTF \l_cube_udlr_bool
-                {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 OLL 等平面的公式示意图时方格间距宽一点
-                {\dim_set:Nn \l_cube_linewidth_dim {\pgflinewidth}}  % 作为立体魔方的一部分时，方格间距窄一点
-            \tl_if_empty:oF {#3} {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 PLL 等平面的公式示意图时方格间距宽一点
-            \fill[\l_cube_tmpd_tl, draw=black!10, line~width=\l_cube_linewidth_dim]
+            % \bool_if:NTF \l_cube_udlr_bool
+            %     {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 OLL 等平面的公式示意图时方格间距宽一点
+            %     {\dim_set:Nn \l_cube_linewidth_dim {\pgflinewidth}}  % 作为立体魔方的一部分时，方格间距窄一点
+            % \tl_if_empty:oF {#3} {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 PLL 等平面的公式示意图时方格间距宽一点
+            \fill[\l_cube_tmpd_tl, draw=black!10,rounded~corners=4\pgflinewidth, line~width=\pgflinewidth]
                 (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, scale=2, pos=0.5] {\str_use:N \l_tmpb_str};
         }
 
@@ -285,7 +278,7 @@
 \newlength{\gfllwidth}
 \setlength{\gfllwidth}{0pt}
 
-\NewDocumentCommand \FLL { m m m O{5mm} m } {
+\NewDocumentCommand \FLL { m m m O{3mm} m } {
     \SetHorizontalCoffin \l_cube_output_coffin {}
 
     % 自动增长序号
@@ -295,6 +288,9 @@
     % \SetHorizontalCoffin \l_cube_index_coffin {\heiti\int_use:N \g_cube_fll_index_int}
     \SetVerticalCoffin \l_cube_index_coffin {2em} {\centering\sffamily\int_compare:nNnTF {\g_cube_fll_index_int} > {9} {\int_use:N \g_cube_fll_index_int} {0\int_use:N \g_cube_fll_index_int}}
 
+    % 缩放到合适大小
+    \ScaleCoffin \l_cube_index_coffin {0.65} {0.65}
+
     % 填充魔方图
     \SetHorizontalCoffin \l_cube_cube_coffin {
         \begin{tikzpicture}
@@ -303,7 +299,7 @@
     }
 
     % 撑起高度 coffin（用于垂直居中对齐）
-    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{18ex}}
+    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{11.7ex}}
 
     % 填充公式
     \tl_set:Ne \l_tmpa_tl {#5}
@@ -314,15 +310,18 @@
     % 设置公式 coffin 宽度以及格式
     \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\raggedright\sffamily\heiti\l_tmpa_tl}
 
+    % 缩放到合适大小
+    \ScaleCoffin \l_cube_formula_coffin {0.65} {0.65}
+
     % 连接魔方和公式（水平对齐）
     \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
     % \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (.5em,0pt)
     \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-l,\l_cube_index_coffin-t] \l_cube_cube_coffin [l,t] (0pt,0pt)
     \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
-    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (-4pt,0pt)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (-2pt,0pt)
 
     % 缩放整体到合适大小
-    \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
+    % \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
 
     % 输出（上下居中对齐）
     % \vspace{3pt}
@@ -468,9 +467,9 @@
 
     \JoinCoffins \l_cube_output_coffin[b,hc] \l_cube_cube_coffin[t,hc] (0pt,-1ex)
     \JoinCoffins \l_cube_output_coffin[\l_cube_cube_coffin-b,\l_cube_cube_coffin-hc]
-                 \l_cube_index_coffin[t,hc] (0pt,-2ex)
+                 \l_cube_index_coffin[t,hc] (0pt,-.5ex)
     \JoinCoffins \l_cube_output_coffin[\l_cube_index_coffin-b,\l_cube_index_coffin-hc]
-                 \l_cube_height_coffin[t,hc] (0pt,-1ex)
+                 \l_cube_height_coffin[t,hc] (0pt,-2.5ex)
     \TypesetCoffin \l_cube_output_coffin
 }
 % endregion
@@ -485,13 +484,15 @@
 \newlength{\gollwidth}
 \setlength{\gollwidth}{0pt}
 
-\NewDocumentCommand{\OLL}{ m m O{6mm}}{
+\NewDocumentCommand{\OLL}{ m m O{3.9mm}}{
     \SetHorizontalCoffin \l_cube_output_coffin {}
 
     % 自动增长序号
     \int_gincr:N \g_cube_oll_index_int
     \SetVerticalCoffin \l_cube_index_coffin {2em} {\centering\sffamily\int_compare:nNnTF {\g_cube_oll_index_int} > {9} {\int_use:N \g_cube_oll_index_int} {0\int_use:N \g_cube_oll_index_int}}
-    % \ScaleCoffin \l_cube_index_coffin {1.5} {1.5}
+
+    % 缩放到合适大小
+    \ScaleCoffin \l_cube_index_coffin {0.65} {0.65}
 
     \SetHorizontalCoffin \l_cube_cube_coffin {
             \begin{tikzpicture}
@@ -507,18 +508,18 @@
     % 设置公式 coffin 宽度以及格式
     \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\raggedright\sffamily\heiti\l_tmpa_tl}
 
+    % 缩放到合适大小
+    \ScaleCoffin \l_cube_formula_coffin {0.65} {0.65}
+
     % 撑起高度 coffin（用于垂直居中对齐）
-    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{18ex}}
+    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{11.7ex}}
 
     % 连接魔方和公式（水平对齐）
-    \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
+    \JoinCoffins \l_cube_output_coffin [l,t] \l_cube_index_coffin [l,t]
     % \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-r,\l_cube_index_coffin-vc] \l_cube_cube_coffin [l,vc] (.5em,0pt)
-    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-l,\l_cube_index_coffin-t] \l_cube_cube_coffin [l,b] (0pt,1ex)
+    \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-l,\l_cube_index_coffin-b] \l_cube_cube_coffin [l,t] (0pt,-.5ex)
     \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
     \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (.5em,0pt)
-
-    % 缩放整体到合适大小
-    \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
 
     % 输出（上下居中对齐）
     % \vspace{3pt}
@@ -550,6 +551,10 @@
     \clist_clear:N \l_tmpa_clist
     \clist_set:Nn \l_tmpa_clist {#2}
 
+    % \seq_put_right:Ne \l_cube_arrows_barsa_seq {
+    %     \exp_not:N\pgfset{arrow~keys/width=1pt 4}
+    % }
+
     \clist_map_inline:Nn \l_tmpa_clist {
         \regex_match_case:nn { % 设置旋转角度，只绘制左边的杠，其它的边都是先在左边
             { l }{\int_set:Nn \l_tmpa_int {0}  } % 绘制好之后再绕中心旋转相应的角度
@@ -560,8 +565,8 @@
         \int_step_inline:nn {\tl_count:n {##1}}{
             \exp_args:Nennn \tl_if_eq:nnTF {\tl_item:nn {##1} {####1}} {-} {\tl_log:n {####1}}{
                 \seq_put_right:Ne \l_cube_arrows_barsa_seq {
-                    \exp_not:N\draw [rotatearound={\int_use:N \l_tmpa_int},black,line~width=3*\pgflinewidth]
-                        (-0.1,####1-0.95) -- +(0,0.9);}
+                    \exp_not:N\draw [rotatearound={\int_use:N \l_tmpa_int},black,line~width=2*\pgflinewidth]
+                        (-0.15,####1-0.95) -- +(0,0.9);}
             }
         }
     }
@@ -583,16 +588,16 @@
 
             % 根据箭头类型设置绘图语句中的标识
             \exp_args:Nne \regex_match_case:nn {
-                { - } {\tl_set:Nn \l_tmpa_tl {->}}
-                { = } {\tl_set:Nn \l_tmpa_tl {<->}}
+                { - } {\tl_set:Nn \l_tmpa_tl {-{to[width=4pt]}}}
+                { = } {\tl_set:Nn \l_tmpa_tl {{to[width=4pt]}-{to[width=4pt]}}}
                 }
                 {\str_item:nn {##1} {2*####1}}
 
             % 先在首尾两点绘制 node ，避免不同的箭头首尾相接
             \seq_put_right:Ne \l_cube_arrows_barsa_seq {
-                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_a_int,0.5+\int_use:N \l_cube_arrows_b_int) node[inner~sep=2pt] (s) {};
-                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_x_int,0.5+\int_use:N \l_cube_arrows_y_int) node[inner~sep=2pt] (d) {};
-                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white,line~width=1.5*\pgflinewidth] (s) -- (d);}
+                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_a_int,0.5+\int_use:N \l_cube_arrows_b_int) node[inner~sep=1pt] (s) {};
+                \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_x_int,0.5+\int_use:N \l_cube_arrows_y_int) node[inner~sep=1pt] (d) {};
+                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white,line~width=\pgflinewidth] (s) -- (d);}
         }
     }
 
@@ -601,6 +606,7 @@
         \exp_not:N\useasboundingbox (-0.2,-0.2) rectangle (3.2,3.2);
     }
 
+    \seq_log:N \l_cube_arrows_barsa_seq
     % 将结果存储到第一个参数指定的序列中
     \seq_set_eq:NN #1 \l_cube_arrows_barsa_seq
 }
@@ -621,13 +627,15 @@
 % 第三个参数是公式编号下的情形命名
 % 第四个参数是出现在最右边的公式
 % 第五个可选参数是画图中的单位长度，默认为 6mm
-\NewDocumentCommand{\PLL}{ m m m m O{6mm}}{
+\NewDocumentCommand{\PLL}{ m m m m O{3.9mm}}{
     \SetHorizontalCoffin \l_cube_output_coffin {}
 
     % 自动增长序号
     \int_gincr:N \g_cube_pll_index_int
     \SetVerticalCoffin \l_cube_index_coffin {2em} {\centering\sffamily\int_compare:nNnTF {\g_cube_pll_index_int} > {9} {\int_use:N \g_cube_pll_index_int} {0\int_use:N \g_cube_pll_index_int}\\[-5pt]#3}
-    % \ScaleCoffin \l_cube_index_coffin {1.5} {1.5}
+
+    % 缩放整体到合适大小
+    \ScaleCoffin \l_cube_index_coffin {0.65} {0.65}
 
     \SetHorizontalCoffin \l_cube_cube_coffin {
         \gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {#1} {#2}
@@ -645,8 +653,11 @@
     % 设置公式 coffin 宽度以及格式
     \SetVerticalCoffin \l_cube_formula_coffin {3cm} {\raggedright\sffamily\heiti\l_tmpa_tl}
 
+    % 缩放整体到合适大小
+    \ScaleCoffin \l_cube_formula_coffin {0.65} {0.65}
+
     % 撑起高度 coffin（用于垂直居中对齐）
-    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{18ex}}
+    \SetHorizontalCoffin \l_cube_height_coffin {\rule{0pt}{11.7ex}}
 
     % 连接魔方和公式（水平对齐）
     \JoinCoffins \l_cube_output_coffin [hc,vc] \l_cube_index_coffin [l,vc]
@@ -654,9 +665,6 @@
     % \JoinCoffins \l_cube_output_coffin [\l_cube_index_coffin-l,\l_cube_index_coffin-t] \l_cube_cube_coffin [l,b] (0pt,1ex)
     \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_height_coffin [hc,vc]
     \JoinCoffins \l_cube_output_coffin [\l_cube_cube_coffin-r,\l_cube_cube_coffin-vc] \l_cube_formula_coffin [l,vc] (.5em,0pt)
-
-    % 缩放整体到合适大小
-    \ScaleCoffin \l_cube_output_coffin {0.65} {0.65}
 
     % 输出（上下居中对齐）
     % \vspace{3pt}
@@ -670,29 +678,29 @@
 \AtBeginDocument{
 % notation
 \box_new:N \g_cube_notation_box
-\hbox_set:Nn \g_cube_notation_box {\CubeNotation{z}}
-\dim_set:Nn \gnotationwidth { \box_wd:N \g_cube_notation_box }
-\dim_set:Nn \gnotationheight { \box_ht_plus_dp:N \g_cube_notation_box }
+\hbox_gset:Nn \g_cube_notation_box {\CubeNotation{z}}
+\dim_gset:Nn \gnotationwidth { \box_wd:N \g_cube_notation_box }
+\dim_gset:Nn \gnotationheight { \box_ht_plus_dp:N \g_cube_notation_box }
 \let\gcubenotationbox=\g_cube_notation_box
 % fll
 \box_new:N \g_cube_fll_box
-\hbox_set:Nn \g_cube_fll_box {\FLL{-----}{-----}{---------}{(RUR')}}
-\dim_set:Nn \gfllwidth { \box_wd:N \g_cube_fll_box }
-\dim_set:Nn \gfllheight { \box_ht_plus_dp:N \g_cube_fll_box }
+\hbox_gset:Nn \g_cube_fll_box {\FLL{-----}{-----}{---------}{(RUR')}}
+\dim_gset:Nn \gfllwidth { \box_wd:N \g_cube_fll_box }
+\dim_gset:Nn \gfllheight { \box_ht_plus_dp:N \g_cube_fll_box }
 \let\gcubefllbox=\g_cube_fll_box
 \int_zero:N \g_cube_fll_index_int
 % oll
 \box_new:N \g_cube_oll_box
-\hbox_set:Nn \g_cube_oll_box {\OLL{---------}{(RUR')}}
-\dim_set:Nn \gollwidth { \box_wd:N \g_cube_oll_box }
-\dim_set:Nn \gollheight { \box_ht_plus_dp:N \g_cube_oll_box }
+\hbox_gset:Nn \g_cube_oll_box {\OLL{---------}{(RUR')}}
+\dim_gset:Nn \gollwidth { \box_wd:N \g_cube_oll_box }
+\dim_gset:Nn \gollheight { \box_ht_plus_dp:N \g_cube_oll_box }
 \let\gcubeollbox=\g_cube_oll_box
 \int_zero:N \g_cube_oll_index_int
 % pll
 \box_new:N \g_cube_pll_box
-\hbox_set:Nn \g_cube_pll_box {\PLL{u,d,l,r}{}{Ua}{(RUR')}}
-\dim_set:Nn \gpllwidth { \box_wd:N \g_cube_pll_box }
-\dim_set:Nn \gpllheight { \box_ht_plus_dp:N \g_cube_pll_box }
+\hbox_gset:Nn \g_cube_pll_box {\PLL{u,d,l,r}{}{Ua}{(RUR')}}
+\dim_gset:Nn \gpllwidth { \box_wd:N \g_cube_pll_box }
+\dim_gset:Nn \gpllheight { \box_ht_plus_dp:N \g_cube_pll_box }
 \let\gcubepllbox=\g_cube_pll_box
 \int_zero:N \g_cube_pll_index_int
 }
