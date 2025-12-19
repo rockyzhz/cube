@@ -1,6 +1,7 @@
 \documentclass{article}
-\usepackage{ctex}
+\usepackage[fontset=ubuntu]{ctex}
 \usepackage{cube-grid}
+\usepackage{enumitem}
 \usepackage[most]{tcolorbox}
 \usepackage[margin=.5cm,a4paper,landscape]{geometry}
 \usepackage{array,tabularx,colortbl}
@@ -8,10 +9,10 @@
 % region 个性化设计
 % region 自定义颜色
 \definecolor{title}{RGB}{34, 98, 163} % {222, 244, 255}
-\definecolor{f2l}{RGB}{203, 223, 244} % {222, 244, 255}
+\definecolor{fll}{RGB}{203, 223, 244} % {222, 244, 255}
 \definecolor{oll}{RGB}{242, 218, 193}
 \definecolor{pll}{RGB}{244, 210, 227}
-\definecolor{myblue}{RGB}{203, 223, 244}
+\definecolor{myblue}{RGB}{212, 227, 255} % {203, 223, 244}
 \definecolor{steps}{RGB}{243, 251, 240} % {194, 234, 154}
 \definecolor{notation}{RGB}{235, 243, 251}
 % endregion
@@ -27,6 +28,23 @@
 \setlength\arrayrulewidth{0.3pt}  % 竖隔线细一点
 \setlength\tabcolsep{2pt}         % 表格内边距为1em
 \pagestyle{empty} % 去掉页眉页脚页码
+% endregion
+
+% region 中文字体的设置
+% 设置 CJK 主字体（对应 \rmfamily）为思源宋体 Light
+\setCJKmainfont{Noto Serif CJK SC}[
+    UprightFont = * ExtraLight,
+    BoldFont = * Bold,
+    ItalicFont = AR PL UKai CN,       % 中文斜体通常用楷体替代
+    BoldItalicFont = AR PL UKai CN    % 中文粗斜体
+]
+% 设置 CJK 无衬线字体（对应 \sffamily）为思源黑体 Light
+\setCJKsansfont{Source Han Sans SC}[
+    UprightFont = * ExtraLight,
+    BoldFont = * Bold
+]
+% 设置 CJK 等宽字体（对应 \ttfamily）
+\setCJKmonofont{FangSong}
 % endregion
 % endregion
 
@@ -59,9 +77,6 @@
         before skip=0pt,
         before={\parindent0pt},  % 去掉首行缩进
         after skip=0pt,
-        % frame code={\path[draw=black!70,fill=myblue,rounded corners=5mm,line width=1mm] (frame.south west) rectangle (frame.north east);}
-        % interior code={},
-        % boxrule=1mm,
         borderline={1mm}{-1pt}{black!70},
         arc=5mm,
         boxsep=0pt,
@@ -80,9 +95,11 @@
     }
 }
 % endregion
+% endregion
 \ExplSyntaxOn
 % region 展开函数自定义变种
 \exp_args_generate:n {eN}
+\exp_args_generate:n {VN}
 % endregion
 
 % region 定义 MultiColsBox 盒子
@@ -91,6 +108,8 @@
 \int_new:N \l_multicolsbox_rows_int
 \box_new:N \l_multicolsbox_box_box
 \seq_new:N \l_multicolsbox_boxarray_seq
+\seq_new:N \l_multicolsbox_keys_seq
+\seq_new:N \l_multicolsbox_vals_seq
 \dim_new:N \l_multicolsbox_height_dim
 \dim_new:N \l_multicolsbox_width_dim
 \dim_new:N \l_multicolsbox_total_width_dim
@@ -124,8 +143,14 @@
                     },
     width .dim_set:N = \l_multicolsbox_total_width_dim,
     width .default:n = {\linewidth},
+    % unknown .code:n = {
+    %                     % 使用原始键名（包含空格）重新构建键值对
+    %                     \seq_put_right:NV \l_multicolsbox_keys_seq \l_keys_key_tl
+    %                     \seq_put_right:NV \l_multicolsbox_vals_seq #1
+    %                 }
 }
-\NewDocumentEnvironment{MultiColsBox}{ O{} }
+% \NewDocumentCommand{\addeq}{ m m }{#1=#2,}
+\NewDocumentEnvironment{MultiColsBox}{ O{} O{} }
 {
     \keys_set:nn {MultiColsBox} {#1}
     \begin{tcolorbox}[pages={\dim_eval:n {\fp_use:N \l_multicolsbox_rows_fp \l_multicolsbox_height_dim}}{\int_use:N \l_multicolsbox_columns_int}]
@@ -134,12 +159,12 @@
     \end{tcolorbox}
     \int_step_inline:nn {\int_use:N \l_multicolsbox_columns_int} {
         \seq_put_right:Nn \l_multicolsbox_boxarray_seq {
-            \useboxarray{##1}
+            \vbox{\vspace{1ex}\useboxarray{##1}}
         }
     }
     \vcoffin_set:Nnn \l_multicolsbox_coffin {\l_multicolsbox_total_width_dim} {
     \begin{tcolorbox}[fixedheight={\dim_eval:n {\int_use:N \l_multicolsbox_rows_int \l_multicolsbox_height_dim}}]
-        \begin{tcolorbox}[fll={\int_use:N \l_multicolsbox_columns_minusone_int}]
+        \begin{tcolorbox}[fll={\int_use:N \l_multicolsbox_columns_minusone_int},#2]
             % 直接使用储存的页面，顶部对齐
             \seq_use:Nn \l_multicolsbox_boxarray_seq { & }
         \end{tcolorbox}
@@ -150,12 +175,11 @@
         {\exp_args:NeN \coffin_gset_eq:cN {\l_multicolsbox_coffin_tl} \l_multicolsbox_coffin}
         {\coffin_typeset:Nnnnn \l_multicolsbox_coffin {H} {l} {0pt} {0pt}}
     \bool_set_false:N \l_multicolsbox_ifcoffin_bool
+    % \seq_log:N \l_multicolsbox_keyvals_seq
+    \seq_clear:N \l_multicolsbox_keyvals_seq
 }
-\ExplSyntaxOff
-% endregion
 % endregion
 
-\ExplSyntaxOn % 启用LaTeX3语法
 % region 一次性设置序列（用逗号分隔）
 % 定义序列（变量名中不能有数字）
 \seq_new:N \g_cube_notation_all_seq
@@ -186,7 +210,7 @@
     {--r--}{--b--}{---r----w}{y'\blue{U'}\\(R'U2)\\(R\blue{U'}R'UR)}, % 15
     {--r--}{--b--}{-r------w}{y'(R'UR\red{U'}\blue{U'})\\(R'\blue{U'}R)\\或者\\\blue{F'}L'U2LF}, % 16
     {--r--}{--bb-}{-----r--w}{FU\\(R\blue{U'}R'\red{F'})\\(R\blue{U'}R')}, % 17
-    {-rr--}{--b--}{-------bw}{U(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'U)}, % 18
+    {-rr--}{--b--}{-------bw}{U(R\blue{U'}R'\blue{U'})\\(R\blue{U'}R'U)\\(R\blue{U'}R')}, % 18
     {--r--}{--b--}{---b----w}{(R\blue{U'}R'U2)\\(RUR')\\或者\\yFRU2R'\red{F'}}, % 19
     {--r--}{--b--}{-b------w}{U(R\red{U'}\blue{U'})\\(R'UR\blue{U'}R')}, % 20
     {--r--}{--br-}{-----b--w}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR')}, % 21
@@ -201,14 +225,14 @@
     {--w--}{--r--}{-b------b}{\blue{U'}(RUR'\blue{U'})\\(R\red{U'}\blue{U'}R')}, % 30
     {--w--}{--rr-}{-----b--b}{UR\blue{U'}R'}, % 31
     {--bb-}{-rw--}{--------r}{\blue{U'}(R\red{U'}\blue{U'}R'U)\\(RUR')}, % 32
-    {--br-}{-bw--}{--------r}{y'U(R'UR)\\\green{d'}(RUR')\\或者\\U(F'U'F)\\U'(RUR')}, % 33
+    {--br-}{-bw--}{--------r}{y'U(R'\blue{U'}R)\\\green{d'}(RUR')\\或者\\U(F'U'F)\\U'(RUR')}, % 33
     {-bb--}{--w--}{-------rr}{y'\blue{U'}\\(R'UR)}, % 34
     {--b--}{--w--}{---r----r}{y'U\\(R'\blue{U'}R\red{U'}\blue{U'})\\(R'UR)}, % 35
     {--b--}{--w--}{-r------r}{y'U\\(R'U2R\red{U'}\blue{U'})\\(R'UR)}, % 36
     {--b--}{--wb-}{-----r--r}{(R\blue{U'}R'U2)\\y'(R'\blue{U'}R)}, % 37
     {-rb--}{--w--}{-------br}{(R\blue{U'}R'U)\\(R\blue{U'}R'U2)\\(R\blue{U'}R')}, % 38
     {--b--}{--w--}{---b----r}{\blue{U'}(RUR'U)\\(RUR')}, % 39
-    {--b--}{--w--}{-b------r}{R U R'}, % 40
+    {--b--}{--w--}{-b------r}{(R U R')}, % 40
     {--b--}{--wr-}{-----b--r}{\blue{U'}(R\blue{U'}R'U)\\(RUR')} % 41
 }
 % endregion
@@ -221,13 +245,13 @@
     {LU-L-RDDR}{f(RUR'\blue{U'})\red{f'}\\\red{f'}U\\F(RUR'\blue{U'})\red{F'}}, % 04
     {UURL--L--}{(r'U2)\\(RUR'U)r\\或者\\y2l'U2L\\UL'Ul}, % 05
     {L--L--DDR}{(r\red{U'}U')\\(R'\blue{U'}R\blue{U'}r')\\或者\\y2lU2L'U'\\LU'l'}, % 06
-    {U-R--R-DD}{(rUR'U)\\(R\red{U'}\blue{U'}r')\\或者\\y2l2UL'U\\LU2l'}, % 07
+    {U-R--R-DD}{(rUR'U)\\(R\red{U'}\blue{U'}r')\\或者\\y2lUL'U\\LU2l'}, % 07
     {-UU--RD-R}{(r'\blue{U'}R\blue{U'})\\(R'U2r)\\或者\\y2l'U'LU'\\L'U2l}, % 08
     {L-U--RDD-}{(RUR'\blue{U'})\\(R'F)\\(R2UR'\blue{U'})\red{F'}}, % 09
     {UU---RL-D}{(RUR'\green{U})\\(R'FR\red{F'})\\(R\red{U'}\blue{U'}R')}, % 10
-    {UURL----D}{(r'R2UR'U)\\(R\red{U'}\blue{U'}R'U)\\green{M'}}, % 11
+    {UURL----D}{(r'R2UR'U)\\(R\red{U'}\blue{U'}R'U)\\\green{M'}}, % 11
     {--UL--DDR}{\green{M'}(R'\blue{U'}R\blue{U'})\\(R'U2R\blue{U'})M}, % 12
-    {LUU---LDD}{f(RU)\\(R2\blue{U'})\\(R'UR\blue{U'})\green{f'}}, % 13
+    {UU----LDD}{f(RU)\\(R2\blue{U'})\\(R'UR\blue{U'})\green{f'}}, % 13
     {LUU---DD-}{(R'F)\\(RUR'\red{F'}R)\\(F\blue{U'}\red{F'})}, % 14
     {UUR---LD-}{(r'\blue{U'}r)\\(R'\blue{U'}RU)\\(r'Ur)}, % 15
     {LU----DDR}{(rUr')\\(RUR'\blue{U'})\\(r\blue{U'}r')}, % 16
@@ -236,8 +260,8 @@
     {-U-L-RLDR}{(r'RU)\\(RUR'\blue{U'}r)\\(R'2FR\red{F'})}, % 19
     {-U-L-R-D-}{(rUR'\blue{U'})\\\green{M'2}U\\(R\blue{U'}R'\blue{U'})\green{M'}}, % 20
     {U-U---D-D}{(R\red{U'}\blue{U'})\\(R'\blue{U'}RUR'\blue{U'})\\(R\blue{U'}R')}, % 21
-    {R-U---R-D}{(R\red{U'}\blue{U'})\\(R'2\blue{U'})(R2\blue{U'})\\(R'2\blue{U'})(\blue{U'}R)}, % 22
-    {U-U------}{(R'2\green{D'})\\(R\red{U'}\blue{U'}R'D)\\(R\green{U'}\blue{U'}R)}, % 23
+    {L-U---L-D}{(R\red{U'}\blue{U'})\\(R'2\blue{U'})(R2\blue{U'})\\(R'2\blue{U'})(\red{U'}R)}, % 22
+    {U-U------}{(R'2\green{D'})\\(R\red{U'}\blue{U'}R'\green{D})\\(R\red{U'}\blue{U'}R)}, % 23
     {U-----D--}{(rUR'\blue{U'})\\(r'FR\red{F'})}, % 24
     {L-------D}{\red{F'}(rUR'\blue{U'})\\(r'FR)}, % 25
     {L-----D-R}{(R\red{U'}\blue{U'})\\(R'\blue{U'}R\blue{U'}R')\\或者\\y'R'U'RU'\\RU2R'}, % 26
@@ -258,12 +282,12 @@
     {U-U--R-D-}{(RUR'\green{U})\\(R\red{U'}\blue{U'}R')F\\(RUR'\blue{U'})\red{F'}}, % 41
     {-U---RD-D}{(R'\blue{U'}R\blue{U'})\\(R'U2R)F\\(RUR'\blue{U'})\red{F'}}, % 42
     {-UR--R--R}{(\red{B'}\blue{U'})\\(R'URB)\\或者\\f'(L'U'LU)f}, % 43
-    {LU-L--L--}{(f(RUR'\blue{U'})\red{f'})}, % 44
+    {LU-L--L--}{f(RUR'\blue{U'})\red{f'}}, % 44
     {LU----LD-}{F(RUR'\blue{U'})\red{F'}}, % 45
     {--RL-R--R}{(R'\blue{U'})\\(R'FR\red{F'})\\(UR)}, % 46
     {U-RL--DDR}{\red{b'}(\blue{U'}R'UR)2b\\或者\\F'(L'U'LU)2F}, % 47
     {L-U--RLDD}{F(RUR'\blue{U'})2\red{F'}}, % 48
-    {UUR--RD-R}{(R\red{B'})\\(R'2FR2B)\\(R'\red{F'}R)}, % 49
+    {UUR--RD-R}{(R\red{B'})\\(R'2FR2B)\\(R'2\red{F'}R)}, % 49
     {LUUL--L-D}{(r'U)\\(r2\blue{U'}r'2\blue{U'})\\(r2Ur')}, % 50
     {LUU---LDD}{f(RUR'\blue{U'})2\red{f'}}, % 51
     {L-UL-RL-D}{(R'\red{F'}\blue{U'}F\blue{U'})\\(RUR'\green{U}R)}, % 52
@@ -283,21 +307,21 @@
     {l-l,u-u,r-r,d-d}{2=6,4=8}{Z} {\green{M'}U\\(\green{M'2}U)2\\\green{M'}U2\\\green{M'2}\blue{U'}}, % 04
     {-ll,uu,-r,-d   }{3-9-7-3}{Aa}{x'R2\green{D2}\\(R'\blue{U'}R)\green{D2}\\(R'UR')}, % 05
     {-ll,uu,-r,-d   }{3-7-9-3}{Ab}{x'(RU'R)D2\\(R'UR)D2R'2}, % 06
-    {-l,-u,-r,-d    }{1=7,3=9}{E} {x'(R\blue{U'}R'\green{D})\\(RUR'\green{D})2\\(R\blue{U'}R'\green{D'})}, % 07
+    {-l,-u,-r,-d    }{1=7,3=9}{E} {x'(R\blue{U'}R'\green{D})\\(RUR'\green{D'})\\(RUR'\green{D})\\(R\blue{U'}R'\green{D'})}, % 07
     {l-l,uu,-dd     }{3=9,4=6}{T} {(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'\red{F'})}, % 08
     {lll,u,-r,--d   }{2=8,3=9}{F} {(R'\blue{U'}\red{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})\\(RUR'UR)}, % 09
-    {ll,--u,r,-dd   }{1=9,2=6}{V} {R'URU'R'f'\\(U'RU'2R')\\(\blue{U'}R\blue{U'}R')fR}, % 10
-    {rr,-dd         }{1=9,2=4}{Y} {F(R\blue{U'}R'\blue{U'})\\(RuR'\red{F'})\\(RuR'\blue{U'})\\(R'FR\red{F'})}, % 11
+    {ll,--u,r,-dd   }{1=9,2=6}{V} {R'URU'R'f'\\(U'RU'2R')\\(U'RU'R')fR}, % 10
+    {rr,-dd         }{1=9,2=4}{Y} {F(R\blue{U'}R'\blue{U'})\\(RUR'\red{F'})\\(RUR'\blue{U'})\\(R'FR\red{F'})}, % 11
     {-ll,uuu,r      }{6=8,7=9}{Ja}{z(\blue{U'}R\red{D'})\\(R2UR'\blue{U'})\\(R2U)\\(\red{D}R')}, % 12
     {lll,uu,--d     }{3=9,6=8}{Jb}{(RUR'\blue{F'})\\(RUR'\blue{U'})\\(R'F)\\(R2\blue{U'}R'\blue{U'})}, % 13
     {ll,-u,--r,d-d  }{1=3,6=8}{Rb}{(R'U2)\\(R\red{U'}\blue{U'})\\(R'FRUR'\blue{U'})\\(R'\red{F'}R2\blue{U'})}, % 14
-    {l-l,-uu,-r,-dd }{2=4,3=9}{Ra}{(R\blue{U'}R'\blue{U'})\\(RUR\red{D})\\(R'\blue{U'}R\red{D'})\\(R'U2R'\blue{U'})}, % 15
+    {l-l,u--,-r,-dd }{2=4,3=9}{Ra}{(R\blue{U'}R'\blue{U'})\\(RUR\green{D})\\(R'\blue{U'}R\green{D'})\\(R'U2R'\blue{U'})}, % 15
     {l-l,-uu        }{1-7-9-1,4-6-8-4}{Gc}{(R'2\blue{u'}R\red{U'}R)\\(UR'u)\\(R2fR'\red{f'})}, % 16
-    {l-l,-rr        }{1-3-7-1,2-4-6-2}{Gd}{(RUR')y'\\(R2\red{u'}R\blue{U'})\\(R'UR'uR2)}, % 17
+    {l-l,-rr        }{1-3-7-1,2-4-8-2}{Gd}{(RUR')y'\\(R2\red{u'}R\blue{U'})\\(R'UR'uR2)}, % 17
     {l-l,dd         }{1-3-7-1,2-4-6-2}{Ga}{R2UR'UR'\\U'RU'R2\\(U'D)R'UR\\(D'U)}, % 18
     {l-l,rr         }{1-7-9-1,2-8-4-2}{Gb}{(R'd'F)\\(R2u)\\(R'U)\\(R\red{U'}R\blue{u'}R'2)}, % 19
     {l,-uu,r,-dd    }{1=9,4=6}{Nb}{(R'UR\blue{U'})\\(R'\red{F'}\blue{U'})\\(FRUR'F)\\(R'\red{F'}R\blue{U'}R)}, % 20
-    {--l,uu,--r,dd  }{3=7,4=6}{Na}{(RUR'\red{U})\\(RUR'\blue{F'})\\(RUR'\blue{U'})(R'F)\\(R2\blue{U'}R'U2)\\(R\blue{U'}R')}, % 21
+    {--l,uu,--r,dd  }{3=7,4=6}{Na}{(RUR'\green{U})\\(RUR'\blue{F'})\\(RUR'\blue{U'})(R'F)\\(R2\blue{U'}R'U2)\\(R\blue{U'}R')}, % 21
 }
 % endregion
 % endregion
@@ -306,10 +330,11 @@
 % \view{f} 正面斜 45度视角
 \begin{document}
 
-% region 标题
+% region \PageOne
 \NewCoffin \PageOne
 \SetHorizontalCoffin \PageOne {}
 
+% region \TitleCoffin 标题
 \NewCoffin \TitleCoffin
 \NewCoffin \LogoCoffin
 \NewCoffin \TitleTextCoffin
@@ -327,7 +352,7 @@
 % 把 \TitleCoffin 安装到 \PageOne 里
 \JoinCoffins \PageOne [l,t] \TitleCoffin [l,t]
 
-% region CFOP 复原步骤
+% region \StepsBoxCoffin CFOP 复原步骤
 \newlength{\stepsgap}
 \setlength{\stepsgap}{.5em}
 \newlength{\stepsunit}
@@ -423,17 +448,10 @@
 \ExplSyntaxOff
 % endregion
 
-
-% \ExplSyntaxOn
-% \dim_log:n {\CoffinWidth\TitleCoffin}
-% \dim_to_decimal_in_cm:n {\CoffinWidth\TitleCoffin}
-% \ExplSyntaxOff
-
 % 把 \NotationCoffin 安装到 \PageOne 里
 \JoinCoffins \PageOne [\StepsBoxCoffin-b,\StepsBoxCoffin-l] \NotationCoffin [l,t] (.5em, -1ex)
-% \JoinCoffins \PageOne [t,r] \NotationCoffin [l,t] (1em, 0pt)
 
-% region F2L 公式页面
+% region F2L 公式部分
 \NewCoffin \FLLCoffin
 \begin{MultiColsBox}[
     columns=5,
@@ -443,6 +461,7 @@
     width=\textwidth-\CoffinWidth\PageOne+1cm,
     ]
 \ExplSyntaxOn
+\int_step_inline:nn {9} {\hbox{\rlap{\rule{0pt}{.98\gfllheight}}\rule{\gfllwidth}{0pt}}}
 \seq_map_variable:NNn \g_cube_fll_all_seq \l_tmpa_tl {
     \hbox{\exp_after:wN\FLL\l_tmpa_tl}
 }
@@ -451,14 +470,45 @@
 % endregion
 
 % 把 \FLLCoffin 安装到 \PageOne 里
-\JoinCoffins \PageOne [r,t] \FLLCoffin [l,t] (.5em, -.8cm)
+\JoinCoffins \PageOne [r,b] \FLLCoffin [l,b] (4.16pt, .25cm)
 
+% region F2L 及第一页的说明文字
+\NewCoffin \FLLTextCoffin
+\ExplSyntaxOn
+\dim_log:N \gfllwidth
+\dim_new:N \l_cube_fll_width_dim
+\dim_set:Nn \l_cube_fll_width_dim {\gfllwidth - .5cm}
+\let\lfllwidth=\l_cube_fll_width_dim
+\ExplSyntaxOff
+\SetVerticalCoffin \FLLTextCoffin {\lfllwidth} {
+    \raggedright\sffamily\heiti
+    \Huge\bfseries\color{orange}
+    F2L\\
+    \Large
+    前两层归位\\[2cm]
+    \addtolength{\textwidth}{-2cm}
+    \footnotesize\mdseries
+    \blue{蓝色字母：用左食指拨动}\\
+    \red{红色字母：用右拇指拨动}\\
+    \green{绿色字母：用其它指拨动}\\[4cm]
+    \color{black}
+    小写字母：双层转\\
+    字母：顺时针转90°\\
+    字母+'：逆时针转90°\\
+    字母+2：重复两次\\[2cm]
+    \hspace{-3pt}\raisebox{-2ex}{\tikz[radius=1cm,scale=0.25]{\fill[orange] (0,0) -- (0,2) -- (5,2) arc[start angle=90,end angle=-90] -- cycle node[white,anchor=west,above right=1.2pt]{温馨提示};}}\color{orange}\dotfill\\[2ex]
+    *CROSS复原方法较多，本教程主要介绍后面3步的复原公式
+}
+% endregion
+
+% 把 \FLLTextCoffin 安装到 \PageOne 里
+\JoinCoffins \PageOne [\FLLCoffin-l,\FLLCoffin-t] \FLLTextCoffin [l,t] (5pt, -10pt)
 
 % 输出 \PageOne 
-\TypesetCoffin \PageOne (-2cm,1cm)
-\ClearCoffin \PageOne
+\TypesetCoffin \PageOne (-2cm,.5cm)
+% endregion
 
-% \PageTwo
+% region \PageTwo
 \NewCoffin \PageTwo
 \SetHorizontalCoffin \PageTwo {}
 
@@ -482,7 +532,6 @@
 % 把 \OLLCoffin 安装到 \PageTwo 里
 \JoinCoffins \PageTwo [l,t] \OLLCoffin [l,t] % (0pt, -1cm)
 % \TypesetCoffin  \OLLCoffin
-% \ClearCoffin    \OLLCoffin
 
 % region PLL 公式页面
 \NewCoffin \PLLCoffin
@@ -491,8 +540,8 @@
     rows=3,
     box={\gcubepllbox},
     coffin={PLLCoffin},
-    width=\textwidth,
-    % width=\linewidth-\CoffinWidth\PageOne-1cm,
+    width=\textwidth,][
+    sharp corners=northeast,
     ]
 \ExplSyntaxOn
 \seq_map_variable:NNn \g_cube_pll_all_seq \l_tmpa_tl {
@@ -503,10 +552,81 @@
 % endregion
 
 % 把 \PLLCoffin 安装到 \PageTwo 里
-\JoinCoffins \PageTwo [\OLLCoffin-l,\OLLCoffin-b] \PLLCoffin [l,t] (0pt, -1ex)
+\JoinCoffins \PageTwo [\OLLCoffin-l,\OLLCoffin-b] \PLLCoffin [l,t] (0pt, -2ex)
 
+% region \OLLTextCoffin
+\NewCoffin \OLLTextCoffin
+\SetVerticalCoffin \OLLTextCoffin {3cm} {
+    \raggedright\sffamily\heiti
+    \Large\bfseries\color{nicered}
+    OLL\\
+    \large
+    最后一层翻色\\[2cm]
+    \footnotesize\mdseries\color{black}
+    OLL和PLL是俯视图
+    \renewcommand\descriptionlabel[1]{\textsf{#1：}\hspace{\labelsep}}
+    \begin{description}[left=0pt,itemindent=-18pt,labelsep=0pt,rightmargin=1em]
+        \color{nicered}
+        \item[OLL] 蓝块和小蓝条表示黄色块\\[2cm]
+        \color{niceblue}
+        \item[PLL] 小黑条表示已归位的色块
+    \end{description}
+}
+% endregion
+
+% 把 \OLLTextCoffin 安装到 \PageTwo 里
+\JoinCoffins \PageTwo [\OLLCoffin-r,\OLLCoffin-t] \OLLTextCoffin [r,t] (0cm, -4cm)
+
+% region \CutoffCoffin 贴片框
+\NewCoffin \CutoffCoffin
+\SetHorizontalCoffin \CutoffCoffin{
+    \tcbox[
+    enhanced,
+    width=90pt,
+    arc=5mm,
+    boxsep=0em,
+    leftupper=2mm,
+    rightupper=1mm,
+    frame code={\draw[black!70,rounded corners=5mm,line width=1mm] (frame.south west) -- ([yshift=-5mm]frame.north west) -- ([yshift=-5mm]frame.north east) -- (frame.north east);},
+    interior code={\fill[white] ([xshift=.5mm,yshift=-1.5mm]frame.south west) [rounded corners=4.5mm] -- ([xshift=.5mm,yshift=-5.5mm]frame.north west) [rounded corners=5.5mm] -- ([xshift=.5mm,yshift=-5.5mm]frame.north east) [sharp corners] -- ([xshift=.5mm]frame.north east) -- ([xshift=2mm]frame.north east) -- ([xshift=2mm,yshift=-1.5mm]frame.south east) -- cycle;}
+    ]
+    {\hbox{\rlap{\rule{0pt}{15mm}}\rule{29.5mm}{0pt}}}
+}
+% endregion
+
+% 把 \CutoffCoffin 安装到 \PageTwo 里
+\JoinCoffins \PageTwo [\OLLCoffin-r,\OLLCoffin-b] \CutoffCoffin [r,b] (3pt, -2.5pt)
+
+% region \PLLTextCoffin
+\NewCoffin \PLLTextCoffin
+\SetHorizontalCoffin \PLLTextCoffin {
+    \begin{tcolorbox}[
+    enhanced,
+    width=90pt,
+    arc=5mm,
+    boxsep=0em,
+    leftupper=2mm,
+    rightupper=1mm,
+    frame code={\draw[black!70,fill=myblue,line width=1mm] (frame.south west) [rounded corners=5mm] -- (frame.north west) [rounded corners=5mm] -- (frame.north east) [sharp corners] -- (frame.south east);},
+    interior code={\fill[myblue] ([yshift=-1mm]interior.south west |- frame.south west) [rounded corners=4.5mm] -- (interior.north west) [rounded corners=4.5mm] -- (interior.north east) [sharp corners] -- ([yshift=-1mm]interior.south east |- frame.south east) -- cycle;},
+    ]
+        \raggedright\sffamily\heiti
+        \Large\bfseries\color{niceblue}
+        PLL\\
+        \large
+        最后一层归位
+    \end{tcolorbox}}
+% endregion
+
+% 把 \PLLTextCoffin 安装到 \PageTwo 里
+\JoinCoffins \PageTwo [\PLLCoffin-r,\PLLCoffin-t] \PLLTextCoffin [r,b] (-.5pt, -2pt)
+
+% % 旋转 180° 适合手机版华为打印
+% \RotateCoffin \PageTwo {180}
+% \TypesetCoffin \PageTwo [r,t] (-.85cm,1ex)
 
 % 输出 \PageTwo 
-\TypesetCoffin \PageTwo  (-.8cm,1.5cm)
+\TypesetCoffin \PageTwo  (-.85cm,2cm)
+% endregion
 
 \end{document}
