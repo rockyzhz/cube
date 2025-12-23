@@ -1,12 +1,13 @@
 % region 开头
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{cube-grid}[2025/12/04 Cube Grid Drawing Library]
+\ProvidesPackage{cube}[2025/12/04 Cube Grid Drawing Library]
 
 \RequirePackage{xfp}
 \RequirePackage{tikz}
 \usetikzlibrary{3d}
 \usetikzlibrary{calc}
 \usetikzlibrary{math}
+\usetikzlibrary{automata}
 \usetikzlibrary{arrows.meta}
 \RequirePackage{xcoffins}
 \RequirePackage{expl3}
@@ -588,8 +589,8 @@
 
             % 根据箭头类型设置绘图语句中的标识
             \exp_args:Nne \regex_match_case:nn {
-                { - } {\tl_set:Nn \l_tmpa_tl {-{to[width=4pt]}}}
-                { = } {\tl_set:Nn \l_tmpa_tl {{to[width=4pt]}-{to[width=4pt]}}}
+                { - } {\tl_set:Nn \l_tmpa_tl {-{to[shorten~<= 2pt, shorten~>= 4pt, line~width=10pt]}}}
+                { = } {\tl_set:Nn \l_tmpa_tl {{to[shorten~<= 2pt, shorten~>= 4pt, line~width=10pt]}-{to[shorten~<= 2pt, shorten~>= 4pt, line~width=10pt]}}}
                 }
                 {\str_item:nn {##1} {2*####1}}
 
@@ -597,7 +598,7 @@
             \seq_put_right:Ne \l_cube_arrows_barsa_seq {
                 \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_a_int,0.5+\int_use:N \l_cube_arrows_b_int) node[inner~sep=1pt] (s) {};
                 \exp_not:N\draw (0.5+\int_use:N \l_cube_arrows_x_int,0.5+\int_use:N \l_cube_arrows_y_int) node[inner~sep=1pt] (d) {};
-                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white,line~width=\pgflinewidth] (s) -- (d);}
+                \exp_not:N\draw[\tl_use:N \l_tmpa_tl,white] (s) -- (d);}
         }
     }
 
