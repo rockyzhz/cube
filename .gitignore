@@ -18,6 +18,9 @@
 *.ind
 *.ilg
 *.xdv
+*.glo
+*.hd
+*.tcbtemp
 
 # LaTeX beamer files
 *.nav
