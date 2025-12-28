@@ -327,7 +327,7 @@
 % endregion
 \ExplSyntaxOff % 启用LaTeX3语法
 
-% \view{f} 正面斜 45度视角
+% \view{o} 45° 斜投影
 \begin{document}
 
 % region \PageOne
@@ -362,13 +362,13 @@
 \NewCoffin \ShortArrow
 \SetHorizontalCoffin \ShortArrow {\tikz{\draw[orange,-{Stealth[length=1.5cm,width=1.5cm,inset=0pt]},line width=6mm] (0,0)--(2.5,0);}}
 \NewCoffin \CrossStepCoffin
-\SetHorizontalCoffin \CrossStepCoffin {\view{r}\tikz{\Cube{-r--r----}{-b--b----}{-w-www-w-}[\stepsunit]}}
+\SetHorizontalCoffin \CrossStepCoffin {\view{r}\Cube{-r--r----}{-b--b----}{-w-www-w-}[\stepsunit]}
 \NewCoffin \FLLStepCoffin
-\SetHorizontalCoffin \FLLStepCoffin {\tikz{\Cube{---bb}{rr---}{---------}[\stepsunit]}}
+\SetHorizontalCoffin \FLLStepCoffin {\Cube{---bb}{rr---}{---------}[\stepsunit]}
 \NewCoffin \OLLStepCoffin
-\SetHorizontalCoffin \OLLStepCoffin {\tikz{\Cube{---bb}{rr---}{yyyyyyyyy}[\stepsunit]}}
+\SetHorizontalCoffin \OLLStepCoffin {\Cube{---bb}{rr---}{yyyyyyyyy}[\stepsunit]}
 \NewCoffin \PLLStepCoffin
-\SetHorizontalCoffin \PLLStepCoffin {\tikz{\Cube{bbbbb}{rrrrr}{yyyyyyyyy}[\stepsunit]}}
+\SetHorizontalCoffin \PLLStepCoffin {\Cube{bbbbb}{rrrrr}{yyyyyyyyy}[\stepsunit]}
 
 \JoinCoffins \StepsCoffin[hc,vc] \CrossStepCoffin[l,vc]
 \JoinCoffins \StepsCoffin[\CrossStepCoffin-r,\CrossStepCoffin-vc] \ShortArrow[l,vc] (\stepsgap,0pt)
