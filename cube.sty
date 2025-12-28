@@ -3,6 +3,7 @@
 \ProvidesPackage{cube}[2025/12/04 Cube Grid Drawing Library]
 
 \RequirePackage{xfp}
+\RequirePackage[svgnames,table]{xcolor}
 \RequirePackage{tikz}
 \usetikzlibrary{3d}
 \usetikzlibrary{calc}
@@ -29,25 +30,25 @@
 \ExplSyntaxOff
 \NewDocumentCommand{\view}{ m }{
     \regexmatchcasenn {
-        { i } % isometric
+        { d } % dimetric
             {
-                % 等轴测投影
+                % 正二等轴测投影
                 \tikzset{3d cube/.style={
                     x={(340:0.8*##1)},  % 从330改为340，更接近水平
                     y={( 90:  1*##1)},
                     z={(200:0.8*##1)}}}   % 从210改为200，更接近水平
             }
-        { a } % all
+        { i } % isometric
             {
-                % 全等轴测投影
+                % 正等轴测投影
                 \tikzset{3d cube/.style={
                     x={(330:1*##1)},  % 从330改为340，更接近水平
                     y={( 90:1*##1)},
                     z={(210:1*##1)}}}   % 从210改为200，更接近水平
             }
-        { f } % front, 45 degree
+        { o } % Oblique Projection, 45 degree, 斜投影
             {
-                % 45°倾斜视角
+                % 45° 斜投影
                 \tikzset{3d cube/.style={
                     x={(  0:  1*##1)},  % 从330改为345，更接近水平
                     y={( 90:  1*##1)},
@@ -63,7 +64,7 @@
             }
     } {#1}
 }
-\view{i} % 设置当前坐标轴为等轴测投影
+\view{d} % 设置当前坐标轴为正二等轴测投影
 
 \tikzset{
     xy plane/.style={canvas is xy plane at z=-#1+0.5,rotate around={-90:(1.5,1.5)}},
@@ -77,8 +78,8 @@
 
 % region \CubeLogo
 \NewDocumentCommand{\CubeLogo}{ O{1} }{{ % 加一层 {} ，让 \view{i} 的影响范围仅限于本命令自身
-    \view{a}
-    \heiti
+    \view{i}
+    \heiti\normalsize
     \scalebox{#1}{
     \begin{tikzpicture}[3d cube={1cm}]
         \begin{scope}[canvas is zx plane at y=1,rotate=90]
@@ -112,11 +113,9 @@
 \prop_new:N \g_cube_color_map_prop
 \prop_gput:Nnn \g_cube_color_map_prop {-} {black!30}
 \prop_gput:Nnn \g_cube_color_map_prop {=} {black!65}
-\prop_gput:Nnn \g_cube_color_map_prop {g} {nicegreen}
+\prop_gput:Nnn \g_cube_color_map_prop {g} {green!70!black}
 \prop_gput:Nnn \g_cube_color_map_prop {b} {niceblue} % {blue}
-\prop_gput:Nnn \g_cube_color_map_prop {l} {niceblue} % l 表示 lan  色
 \prop_gput:Nnn \g_cube_color_map_prop {r} {nicered}  % {red}
-\prop_gput:Nnn \g_cube_color_map_prop {h} {nicered}  % h 表示 hong 色
 \prop_gput:Nnn \g_cube_color_map_prop {w} {white}
 \prop_gput:Nnn \g_cube_color_map_prop {o} {orange}
 \prop_gput:Nnn \g_cube_color_map_prop {y} {yellow!80!orange!90!black}
@@ -173,8 +172,8 @@
                             \bool_lazy_or:nnTF {\l_cube_udlr_bool} {\l_cube_num_bool}
                                 {
                                     \regex_match_case:nn {
-                                        { r } {\str_set:Nn \l_tmpa_str {h}} % 数字模式下，把红色改为 nicered
-                                        { [\-b] } {\str_set:Nn \l_tmpa_str {l}} % 数字模式下，把蓝色改为 niceblue
+                                        { r } {\str_set:Nn \l_tmpa_str {r}} % 数字模式下，把红色改为 nicered
+                                        { - } {\str_set:Nn \l_tmpa_str {b}} % 数字模式下，把蓝色改为 niceblue
                                         { . } {\str_set:Nn \l_tmpa_str {##1}} % 数字模式下，其它颜色保持不变
                                     } {##1}}
                                 {\str_set:Nn \l_tmpa_str {##1}}
@@ -190,7 +189,7 @@
 
             % 获取颜色
             % \bool_if:NTF \l_tmpa_bool {\str_set:Nn \l_tmpa_str {-}} {\str_set:Nn \l_tmpa_str {##1}}
-            \prop_get:NVNF \g_cube_color_map_prop {\l_tmpa_str} \l_cube_tmpd_tl {\tl_set:Nn \l_cube_tmpd_tl {black!30}\errmessage{Invalid~parameter~for~\drawsquares}}
+            \prop_get:NVNF \g_cube_color_map_prop {\l_tmpa_str} \l_cube_tmpd_tl {\str_log:N \l_tmpa_str\tl_set:Nn \l_cube_tmpd_tl {black!30}\errmessage{Invalid~parameter~for~\drawsquares}}
 
             % 绘制正方形（1cm边长，填充对应颜色，白色描边，2pt线宽）
             % 注意：Y坐标需要反转（第一行在顶部）
@@ -199,7 +198,7 @@
             %     {\dim_set:Nn \l_cube_linewidth_dim {\pgflinewidth}}  % 作为立体魔方的一部分时，方格间距窄一点
             % \tl_if_empty:oF {#3} {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 PLL 等平面的公式示意图时方格间距宽一点
             \fill[\l_cube_tmpd_tl, draw=black!10,rounded~corners=4\pgflinewidth, line~width=\pgflinewidth]
-                (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, scale=2, pos=0.5] {\str_use:N \l_tmpb_str};
+                (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, pos=0.5] {\str_use:N \l_tmpb_str};
         }
 
         % 添加占位的 bouding box ，以便不同的公式示意图保持对齐
@@ -255,8 +254,10 @@
             }
     }
 
-    \exp_args:Noonnn
-    \drawcube{\l_cube_front_expanded}{\l_cube_right_expanded}{#3}{#4}{}
+    \begin{tikzpicture}
+        \exp_args:Noonnn
+        \drawcube{\l_cube_front_expanded}{\l_cube_right_expanded}{#3}{#4}{}
+    \end{tikzpicture}
 }
 % endregion
 
@@ -294,9 +295,7 @@
 
     % 填充魔方图
     \SetHorizontalCoffin \l_cube_cube_coffin {
-        \begin{tikzpicture}
-            \Cube{#1}{#2}{#3}[#4]
-        \end{tikzpicture}
+        \Cube{#1}{#2}{#3}[#4]
     }
 
     % 撑起高度 coffin（用于垂直居中对齐）
@@ -642,7 +641,7 @@
         \gen_arrows_bars_seq:Nnn \l_cube_arrows_bars_seq {#1} {#2}
         \seq_log:N \l_cube_arrows_bars_seq
         \begin{tikzpicture}
-            \drawsquares[x=#5,y=#5]{lllllllll}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
+            \drawsquares[x=#5,y=#5]{bbbbbbbbb}[\seq_use:Nn \l_cube_arrows_bars_seq {}]
         \end{tikzpicture}}
 
     % 填充公式
