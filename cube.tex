@@ -1,0 +1,215 @@
+% \documentclass{article}
+\documentclass[a4paper,11pt]{l3doc}
+% \usepackage[margin=1cm]{geometry}
+\usepackage[fontset=ubuntu]{ctex}
+\usepackage{cube}
+\usepackage[skins,documentation]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{array,tabularx,colortbl}
+
+% region 样式设置
+\let\oldmarg=\marg
+\renewcommand{\marg}[1]{\oldmarg{\kaishu#1}}
+\let\oldoarg=\oarg
+\renewcommand{\oarg}[1]{\oldoarg{\kaishu#1}}
+\let\oldmeta=\meta
+\renewcommand{\meta}[1]{\oldmeta{\kaishu#1}}
+\renewcommand{\thesubsection}{\bullet}
+\let\oldsubsection=\subsection
+\renewcommand{\subsection}[1]{\oldsubsection{\texttt{\zihao{5}#1}}}
+\DeclareDocumentCommand{\textsccolor}{ m }{\textcolor{Definition}{\textsc{\kaishu#1}}}
+\DeclareDocumentCommand{\textsfcolor}{ m }{\textcolor{niceblue}{\textsf{\kaishu#1}}}
+\DeclareDocumentCommand{\textttcolor}{ m }{\textcolor{Definition}{\texttt{\kaishu#1}}}
+\DeclareRobustCommand \rcs {\textttcolor}
+\DeclareRobustCommand \pkg {\textsfcolor}
+\DeclareRobustCommand \env {\textttcolor}
+
+\newtcolorbox{cubeExample}{%
+  enhanced,
+  colback=ExampleBack,
+  colframe=ExampleFrame,
+  before skip=10pt,
+  after skip=10pt,
+  boxsep=5pt,
+}
+% endregion
+
+% region 自定义命令
+\ProvideDocumentCommand{\red}{m}{\textcolor{red}{#1}}
+\ProvideDocumentCommand{\blue}{m}{\textcolor{blue}{#1}}
+\ProvideDocumentCommand{\orange}{m}{\textcolor{orange}{#1}}
+\ProvideDocumentCommand{\green}{m}{\textcolor{nicegreen}{#1}}
+% endregion
+
+% region 颜色设置
+\definecolor{spot}{HTML}{003399}
+\definecolor{code}{HTML}{a25e26}
+\definecolor{verb}{HTML}{007f00}
+\let\OriginalMF\MacroFont
+\def\MacroFont{\color{spot}\OriginalMF}
+\makeatletter
+\pretocmd{\macrocode}{\def\macro@font{\color{code}\OriginalMF}\def\MacroFont{\color{code}\OriginalMF}}{}{}
+\makeatother
+\AtBeginEnvironment{quote}{\color{verb}}
+\AtBeginEnvironment{flushleft}{\tt\color{verb}}
+\AtBeginEnvironment{verbatim}{\color{verb}\def\MacroFont{\color{verb}\OriginalMF}}
+\ExplSyntaxOn
+\pretocmd{\__codedoc_typeset_functions:}{\color{spot}\arrayrulecolor{spot}}{}{}
+\patchcmd{\__codedoc_typeset_aux:n}{\color[gray]{0.5}}{\color{spot}}{}{}
+\ExplSyntaxOff
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=spot,
+  urlcolor=spot,
+  citecolor=spot,
+  bookmarksopen=false,
+  bookmarksnumbered=false,
+  plainpages=false}
+% endregion
+\begin{document}
+
+\ttfamily % 设置全文英文字体为等宽字体
+
+% region 标题
+\title{{\raisebox{-1ex}{\CubeLogo[0.5]}}\pkg{cube}：魔方绘制宏包}
+\author{张泓知}
+\date{\today}
+\maketitle
+% endregion
+
+% region 简介
+\section{简介}
+\pkg{cube} 宏包用于绘制魔方相关图形。它提供了简单的命令来表示三阶魔方的各个面、块和颜色，使得在 \LaTeX\ 文档中插入魔方图形变得方便快捷。
+本宏包提供的部分命令为方便后续封装的考虑，仅包含在了\env{scope}环境中，用户如果需要直接使用的话，还需要自行添加\env{tikzpicture}环境（或
+搭配\cs{tikz}命令来使用），这部分命令我们以\rcs{红色}式样作为标注。
+% endregion
+
+% region 命令
+\section{命令}
+
+% region \CubeLogo
+\begin{function}{\CubeLogo}
+  \begin{syntax}
+    \cs{CubeLogo}\oarg{放大因子}
+  \end{syntax}
+绘制一个魔方的标志性图案，默认大小为 1 倍。用法示例如下：
+\end{function}
+\begin{dispExample*}{sidebyside,lefthand width=0.2\textwidth}
+\CubeLogo
+\CubeLogo[1.5]
+\end{dispExample*}
+% endregion
+
+% region \Cube
+\begin{function}{\Cube}
+  \begin{syntax}
+    \cs{Cube}\marg{正面}\marg{右侧面}\marg{顶面}\oarg{单位长度}
+  \end{syntax}
+绘制一个魔方的3D图，\meta{正面}、\meta{右侧面} 和 \meta{顶面} 分别表示正面、右侧面和顶面，
+\meta{单位长度}用来设置\env{tikzpicture}环境的单位长度，默认为 5mm 。
+\end{function}
+\meta{正面}、\meta{右侧面} 和 \meta{顶面} 参数分别为 9 个或者 5 个字符的字符串，
+每个字符代表一个小方块的颜色，其中\meta{正面}和\meta{右侧面}即可以为 9 个字符，
+也可以为 5 个字符（表示只绘制如下图所示的 5 个小方块，此时正面剩余的四个位置为
+默认的\textcolor{niceblue}{蓝色}，右侧面剩余的位置为默认的
+\textcolor{nicered}{红色}）。每个字符根据顺序如下图所示，
+依次表示对应位置的小方块颜色：
+\begin{dispExample*}{center lower}
+\Cube{123456789}{123456789}{123456789}[1cm]
+\Cube{12345}{12345}{123456789}[1cm]
+\end{dispExample*}
+
+\meta{正面}、\meta{右侧面} 和 \meta{顶面} 参数支持的颜色字符及其对应颜色如下表所示：
+
+{\noindent
+\begin{tabular*}{\textwidth}{*{4}{>{\centering\ttfamily}p{1cm}p{1.5cm}}}
+  \hline
+  字符 & 颜色 & 字符 & 颜色 & 字符 & 颜色 & 字符 & 颜色 \\
+  \hline
+  - & \textcolor{black!30}{浅灰色} & = & \textcolor{black!65}{深灰色} & g & \textcolor{green!70!black}{绿色} & b & \textcolor{niceblue}{蓝色} \\
+  r & \textcolor{nicered}{红色} & w & \fcolorbox{white}{black}{\textcolor{white}{白色}} & o & \textcolor{orange}{橙色} & y & \textcolor{yellow!80!orange!90!black}{黄色} \\
+  \hline
+\end{tabular*}}
+
+\bigskip
+实际使用中，可以根据需要选择合适的字符来表示不同颜色的小方块。例如，下面的例子展示了如何使用不同的颜色字符来绘制魔方的3D图：
+\begin{dispExample*}{center lower}
+\Cube{----b}{r--r-}{-----b---}
+\Cube{---bb-bbb}{-r--rrrrr}{-----b---}
+\Cube{rwryroobo}{bbwyyyywg}{gggbbwwow}
+\Cube{bbbbbbbbb}{rrrrrrrrr}{yyyyyyyyy}
+\end{dispExample*}
+从以上可以看出，5字符是9字符的一种子集。5字符的表达方式更简洁，在F2L等场景下更为实用。
+% endregion
+
+% region \view
+\begin{function}{\view}
+  \begin{syntax}
+    \cs{view}\marg{视角}
+  \end{syntax}
+设置魔方的三维视角，\meta{视角} 参数可以取以下值：
+\begin{description}[font=\kaishu\ttfamily,left=0pt,itemindent=-28pt,labelsep=2em]
+  \item[d] 默认设置，表示正二等轴测投影，左右对称， z轴略短。
+  \item[i] 正等轴测投影，即 x、y、z 轴方向的投影长度相等，\cs{CubeLogo}即采用此视角。
+  \item[o] 45° 斜投影，即 xy 平面是真实大小，z 轴方向的投影角度为45度，长度为真实长度的 0.5 倍。
+  \item[r] 将魔方旋转 180 度后的等轴测投影（可用于演示 CROSS 的情况）。
+\end{description}
+\end{function}
+使用示例如下：
+\begin{dispExample*}{center lower}
+{\view{r}\Cube{-r--r----}{-b--b----}{-w-www-w-}}
+{\view{d}\Cube{---bb}{rr---}{---------}}
+{\view{i}\Cube{---bb}{rr---}{yyyyyyyyy}[3mm]}
+{\view{o}\Cube{bbbbb}{rrrrr}{yyyyyyyyy}}
+\end{dispExample*}
+% endregion
+
+% region \CubeNotation
+\begin{function}{\CubeNotation}
+  \begin{syntax}
+    \cs{CubeNotation}\marg{魔方公式符号}\oarg{单位长度}
+  \end{syntax}
+绘制魔方公式的三维图，\meta{单位长度} 用来设置 \env{tikzpicture} 环境的单位长度，默认为 3mm.
+\meta{魔方公式符号} 参数表示魔方公式的各个转动符号。
+
+\cs{CubeNotation} 命令是用几个 coffin 包装起来的完整标记，用法示例：
+\end{function}
+\begin{dispExample*}{sidebyside,lefthand width=0.3\textwidth}
+\CubeNotation{R}
+\CubeNotation{b'}
+\CubeNotation{M'2}
+\CubeNotation{y}
+\end{dispExample*}
+\cs{CubeNotation} 作为一个用 coffin 封装的命令，它是有固定的高度和宽度的，
+因此在排版时可以方便地进行对齐。它们的高度和宽度储存在以下变量中：
+\begin{variable}{\gnotationheight,\gnotationwidth,\gcubenotationbox}
+  \begin{syntax}
+    \cs{gnotationheight} \\
+    \cs{gnotationwidth} \\
+    \cs{gcubenotationbox}
+  \end{syntax}
+  这三个变量分别表示魔方公式图的高度、宽度和 box 对象，可以用于自定义排版。
+  请注意，视角变换会影响这些变量的值，因此如果要进行全局视角切换，请在
+  |\begin{document}| 之前添加 \cs{view} 命令。
+\end{variable}
+% endregion
+
+% region \FLL
+\begin{function}{\FLL}
+  \begin{syntax}
+    \cs{FLL}\marg{正面}\marg{右侧面}\marg{顶面}\oarg{单位长度}\marg{魔方公式}
+  \end{syntax}
+  \cs{FLL} 命令用于绘制 F2L 步骤的魔方公式示意图，它是基于\cs{Cube}命令的 coffin 封装，
+  \meta{正面}、\meta{右侧面}、\meta{顶面} 和 \oarg{单位长度}参数的含义与
+  \cs{Cube}命令相同，\marg{魔方公式} 是可以接收多行输入的魔方公式符号字符串，通常不要超过5行。
+  使用示例如下：
+\end{function}
+\begin{dispExample*}{center lower}
+\FLL{----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}
+\FLL{---bw}{br---}{---------}{(RUR'\blue{U'})\\(RU2R'\blue{U'})\\(RUR')}
+\FLL{----w}{b--r-}{-----b---}{(R\blue{U'}R'U)\\(R\blue{U'}R')}
+\end{dispExample*}
+% endregion
+
+% endregion
+\end{document}
