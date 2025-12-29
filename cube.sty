@@ -23,11 +23,12 @@
 \colorlet{niceyellow}{yellow!80!orange!90!black}
 % endregion
 
-% region tikz 设置
 \ExplSyntaxOn
 \let\regexmatchcasenn=\regex_match_case:nn
 \let\ClearCoffin=\coffin_gclear:N
 \ExplSyntaxOff
+
+% region tikz 设置
 \NewDocumentCommand{\view}{ m }{
     \regexmatchcasenn {
         { d } % dimetric
@@ -134,7 +135,7 @@
 
 % 主函数：根据字符串绘制彩色正方形（九宫格排列）
 % 使用 scope 环境，可以嵌套在其他 tikz 环境中
-\NewDocumentCommand \drawsquares { O{} m O{} O{b} } {
+\NewDocumentCommand \drawsquares { O{} m O{} O{-} } {
     \begin{scope}[#1]
         \regex_match:nnTF
             { [UDLR] }
@@ -206,6 +207,25 @@
 
         % 添加额外的作图语句
         #3
+    \end{scope}
+}
+% endregion
+
+% region \drawcube 函数定义
+% 魔方绘制函数：绘制三面视图的魔方
+\NewDocumentCommand{\drawcube}{ m m m m m }{
+    \begin{scope}[3d~cube={#4}]
+        % 绘制正面
+        \drawsquares[canvas~is~xy~plane~at~z=0]{#1}[][b]
+
+        % 绘制右侧面
+        \drawsquares[canvas~is~yz~plane~at~x=3,~rotate=-90]{#2}[][r]
+
+        % 绘制顶面
+        \drawsquares[canvas~is~zx~plane~at~y=3,~rotate=~90]{#3}[][y]
+
+        % 其它的绘图语句（如边框等）可以在这里添加
+        #5
     \end{scope}
 }
 % endregion
@@ -626,7 +646,7 @@
 % 前两个参数的定义参照 \gen_arrows_bars_seq:Nnn 函数定义中的参数解释
 % 第三个参数是公式编号下的情形命名
 % 第四个参数是出现在最右边的公式
-% 第五个可选参数是画图中的单位长度，默认为 6mm
+% 第五个可选参数是画图中的单位长度，默认为 3.9mm
 \NewDocumentCommand{\PLL}{ m m m m O{3.9mm}}{
     \SetHorizontalCoffin \l_cube_output_coffin {}
 
@@ -688,40 +708,22 @@
 \dim_gset:Nn \gfllwidth { \box_wd:N \g_cube_fll_box }
 \dim_gset:Nn \gfllheight { \box_ht_plus_dp:N \g_cube_fll_box }
 \let\gcubefllbox=\g_cube_fll_box
-\int_zero:N \g_cube_fll_index_int
+\int_gzero:N \g_cube_fll_index_int
+\let\gcubefllindexint=\g_cube_fll_index_int
 % oll
 \box_new:N \g_cube_oll_box
 \hbox_gset:Nn \g_cube_oll_box {\OLL{---------}{(RUR')}}
 \dim_gset:Nn \gollwidth { \box_wd:N \g_cube_oll_box }
 \dim_gset:Nn \gollheight { \box_ht_plus_dp:N \g_cube_oll_box }
 \let\gcubeollbox=\g_cube_oll_box
-\int_zero:N \g_cube_oll_index_int
+\int_gzero:N \g_cube_oll_index_int
 % pll
 \box_new:N \g_cube_pll_box
 \hbox_gset:Nn \g_cube_pll_box {\PLL{u,d,l,r}{}{Ua}{(RUR')}}
 \dim_gset:Nn \gpllwidth { \box_wd:N \g_cube_pll_box }
 \dim_gset:Nn \gpllheight { \box_ht_plus_dp:N \g_cube_pll_box }
 \let\gcubepllbox=\g_cube_pll_box
-\int_zero:N \g_cube_pll_index_int
-}
-% endregion
-
-% region \drawcube 函数定义
-% 魔方绘制函数：绘制三面视图的魔方
-\NewDocumentCommand{\drawcube}{ m m m m m }{
-    \begin{scope}[3d~cube={#4}]
-        % 绘制正面
-        \drawsquares[canvas~is~xy~plane~at~z=0]{#1}
-
-        % 绘制右侧面
-        \drawsquares[canvas~is~yz~plane~at~x=3,~rotate=-90]{#2}[][r]
-
-        % 绘制顶面
-        \drawsquares[canvas~is~zx~plane~at~y=3,~rotate=~90]{#3}[][y]
-
-        % 其它的绘图语句（如边框等）可以在这里添加
-        #5
-    \end{scope}
+\int_gzero:N \g_cube_pll_index_int
 }
 % endregion
 
