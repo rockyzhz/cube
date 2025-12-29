@@ -17,21 +17,21 @@
 \renewcommand{\thesubsection}{\bullet}
 \let\oldsubsection=\subsection
 \renewcommand{\subsection}[1]{\oldsubsection{\texttt{\zihao{5}#1}}}
-\DeclareDocumentCommand{\textsccolor}{ m }{\textcolor{Definition}{\textsc{\kaishu#1}}}
+\DeclareDocumentCommand{\redtext}{ m }{\textcolor{Definition}{\textsc{\kaishu{#1}}}}
+\robustify{\redtext}
+\DeclareDocumentCommand{\textttred}{ m }{\textcolor{Definition}{\texttt{\kaishu\cs{#1}}}}
+\DeclareDocumentCommand{\textttgreen}{ m }{\textcolor{nicegreen}{\texttt{\kaishu\cs{#1}}}}
 \DeclareDocumentCommand{\textsfcolor}{ m }{\textcolor{niceblue}{\textsf{\kaishu#1}}}
 \DeclareDocumentCommand{\textttcolor}{ m }{\textcolor{Definition}{\texttt{\kaishu#1}}}
-\DeclareRobustCommand \rcs {\textttcolor}
+\DeclareRobustCommand \rcs {\textttred}
+\DeclareRobustCommand \gcs {\textttgreen}
 \DeclareRobustCommand \pkg {\textsfcolor}
 \DeclareRobustCommand \env {\textttcolor}
 
-\newtcolorbox{cubeExample}{%
-  enhanced,
-  colback=ExampleBack,
-  colframe=ExampleFrame,
-  before skip=10pt,
-  after skip=10pt,
-  boxsep=5pt,
-}
+\newsavebox{\myspreadbox}
+\newenvironment{spreadcontents} %[1][\linewidth]
+  {\begin{lrbox}{\myspreadbox}}
+  {\end{lrbox}\noindent\makebox[\linewidth][s]{\usebox{\myspreadbox}}}
 % endregion
 
 % region 自定义命令
@@ -71,7 +71,7 @@
 \ttfamily % 设置全文英文字体为等宽字体
 
 % region 标题
-\title{{\raisebox{-1ex}{\CubeLogo[0.5]}}\pkg{cube}：魔方绘制宏包}
+\title{{\raisebox{-1ex}{\CubeLogo[0.5]}}\pkg{cube}：三阶魔方绘制宏包}
 \author{张泓知}
 \date{\today}
 \maketitle
@@ -81,7 +81,7 @@
 \section{简介}
 \pkg{cube} 宏包用于绘制魔方相关图形。它提供了简单的命令来表示三阶魔方的各个面、块和颜色，使得在 \LaTeX\ 文档中插入魔方图形变得方便快捷。
 本宏包提供的部分命令为方便后续封装的考虑，仅包含在了\env{scope}环境中，用户如果需要直接使用的话，还需要自行添加\env{tikzpicture}环境（或
-搭配\cs{tikz}命令来使用），这部分命令我们以\rcs{红色}式样作为标注。
+搭配\cs{tikz}命令来使用），这部分命令我们以\redtext{红色}式样作为标注。
 % endregion
 
 % region 命令
@@ -119,7 +119,8 @@
 \Cube{12345}{12345}{123456789}[1cm]
 \end{dispExample*}
 
-\meta{正面}、\meta{右侧面} 和 \meta{顶面} 参数支持的颜色字符及其对应颜色如下表所示：
+{\noindent\meta{正面}、\meta{右侧面} 和 \meta{顶面} 参数支持的颜色字符及其对应颜色如下表所示：}
+\medskip
 
 {\noindent
 \begin{tabular*}{\textwidth}{*{4}{>{\centering\ttfamily}p{1cm}p{1.5cm}}}
@@ -156,10 +157,10 @@
 \end{description}
 \end{function}
 使用示例如下：
-\begin{dispExample*}{center lower}
+\begin{dispExample*}{center lower,environment lower=spreadcontents,leftlower=-1em}
 {\view{r}\Cube{-r--r----}{-b--b----}{-w-www-w-}}
 {\view{d}\Cube{---bb}{rr---}{---------}}
-{\view{i}\Cube{---bb}{rr---}{yyyyyyyyy}[3mm]}
+{\view{i}\Cube{---bb}{rr---}{yyyyyyyyy}[4mm]}
 {\view{o}\Cube{bbbbb}{rrrrr}{yyyyyyyyy}}
 \end{dispExample*}
 % endregion
@@ -169,8 +170,8 @@
   \begin{syntax}
     \cs{CubeNotation}\marg{魔方公式符号}\oarg{单位长度}
   \end{syntax}
-绘制魔方公式的三维图，\meta{单位长度} 用来设置 \env{tikzpicture} 环境的单位长度，默认为 3mm.
-\meta{魔方公式符号} 参数表示魔方公式的各个转动符号。
+绘制魔方公式符号的带箭头指示的三维示意图，\meta{魔方公式符号} 参数表示魔方公式的各个转动符号。
+  \meta{单位长度} 用来设置 \env{tikzpicture} 环境的单位长度，则为 3mm.
 
 \cs{CubeNotation} 命令是用几个 coffin 包装起来的完整标记，用法示例：
 \end{function}
@@ -184,13 +185,13 @@
 因此在排版时可以方便地进行对齐。它们的高度和宽度储存在以下变量中：
 \begin{variable}{\gnotationheight,\gnotationwidth,\gcubenotationbox}
   \begin{syntax}
-    \cs{gnotationheight} \\
-    \cs{gnotationwidth} \\
-    \cs{gcubenotationbox}
+    \gcs{gnotationheight} \\
+    \gcs{gnotationwidth} \\
+    \gcs{gcubenotationbox}
   \end{syntax}
   这三个变量分别表示魔方公式图的高度、宽度和 box 对象，可以用于自定义排版。
-  请注意，视角变换会影响这些变量的值，因此如果要进行全局视角切换，请在
-  |\begin{document}| 之前添加 \cs{view} 命令。
+  请\textcolor{Definition}{注意}，视角变换会影响这些变量的值，因此如果要进行全局视角切换，请在
+  导言区添加 \cs{view} 命令。
 \end{variable}
 % endregion
 
@@ -201,13 +202,157 @@
   \end{syntax}
   \cs{FLL} 命令用于绘制 F2L 步骤的魔方公式示意图，它是基于\cs{Cube}命令的 coffin 封装，
   \meta{正面}、\meta{右侧面}、\meta{顶面} 和 \oarg{单位长度}参数的含义与
-  \cs{Cube}命令相同，\marg{魔方公式} 是可以接收多行输入的魔方公式符号字符串，通常不要超过5行。
+  \cs{Cube}命令相同，\marg{魔方公式} 参数可以接收最好不超过5行的魔方公式。
   使用示例如下：
 \end{function}
 \begin{dispExample*}{center lower}
 \FLL{----b}{r--r-}{-----b---}{(R'\red{F'}RU)\\(R\blue{U'}R'F)}
 \FLL{---bw}{br---}{---------}{(RUR'\blue{U'})\\(RU2R'\blue{U'})\\(RUR')}
 \FLL{----w}{b--r-}{-----b---}{(R\blue{U'}R'U)\\(R\blue{U'}R')}
+\end{dispExample*}
+左上角的序号是自增序号，可以通过修改变量 \cs{g_cube_fll_index_int} 来设置起始序号（默认为 0，先自增再排版，即从 1 开始）。
+\cs{FLL} 命令同样作为 coffin 封装的命令，它也是有固定的高度和宽度的。
+\begin{variable}{\gfllheight,\gfllwidth,\gcubefllbox,\g_cube_fll_index_int}
+  \begin{syntax}
+    \gcs{gfllheight} \\
+    \gcs{gfllwidth} \\
+    \gcs{gcubefllbox} \\
+    \gcs{g_cube_fll_index_int}
+  \end{syntax}
+  这三个变量分别表示 \cs{FLL} 的高度、宽度、 box 对象和已排版序号，可以用于自定义排版。
+\end{variable}
+% endregion
+
+% region \OLL
+\begin{function}{\OLL}
+  \begin{syntax}
+    \cs{OLL}\marg{顶面色块}\marg{魔方公式}\oarg{单位长度}
+  \end{syntax}
+  \cs{OLL} 命令用于绘制 OLL 步骤的魔方公式示意图，
+  \meta{顶面色块} 参数专门用来指示顶面色块在顶层侧面的分布情况，其格式为 9 个字符的字符串，依照从左到右、从上到下的顺序，用大写
+  的字符 U/D/L/R 分别表示色块在对应位置的上方（Up）、下方（Down）、左侧（Left）、右侧（Right），色块在顶面则用 - 表示（在图中会显示为蓝色）。
+  \meta{魔方公式} 参数可以接收最好不超过5行的魔方公式。\meta{单位长度} 用来设置 \env{tikzpicture} 环境的单位长度，默认为 3.9mm.
+  使用示例如下：
+\end{function}
+\begin{dispExample*}{center lower}
+\OLL{LU----DDR}{(rUr')\\(RUR'\blue{U'})\\(r\blue{U'}r')}
+\OLL{-UUL-RLD-}{(RUR'U)\\(R'FRF')\\U2(R'FRF')}
+\OLL{L-------D}{\red{F'}(rUR'\blue{U'})\\(r'FR)}
+\end{dispExample*}
+左上角的序号是自增序号，可以通过修改变量 \cs{g_cube_oll_index_int} 来设置起始序号（默认为 0，先自增再排版，即从 1 开始）。
+\cs{OLL} 命令同样作为 coffin 封装的命令，它也是有固定的高度和宽度的。
+\begin{variable}{\gollheight,\gollwidth,\gcubeollbox,\g_cube_oll_index_int}
+  \begin{syntax}
+    \gcs{gollheight} \\
+    \gcs{gollwidth} \\
+    \gcs{gcubeollbox} \\
+    \gcs{g_cube_oll_index_int}
+  \end{syntax}
+  这三个变量分别表示 \cs{OLL} 的高度、宽度、 box 对象和已排版序号，可以用于自定义排版。
+\end{variable}
+% endregion
+
+% region \PLL
+\begin{function}{\PLL}
+  \begin{syntax}
+    \cs{PLL}\marg{顶层边块}\marg{箭头}\marg{公式类别}\marg{魔方公式}\oarg{单位长度}
+  \end{syntax}
+  \cs{PLL} 命令用于绘制 PLL 步骤的魔方公式示意图。
+
+  \begin{description}[left=0pt,itemindent=-28pt,labelsep=1em]
+    \item[\meta{顶层边块}] 参数用来指示顶层侧面的分布情况，参数形式是 \meta{comma list} ，逗号隔开的每一项都是一个最多包含3个字符的字符串，
+      分别用小写字母 l/r/u/d/- 表示边块魔方顶层的左侧（left）、右侧（right）、上方（up）、下方（down）位置，- 表示该位置不画条块。
+      每个字符串字符排列顺序依顺时针方向依次指示，末尾如果不画条块，可以省略 - 字符。但是前面的 - 字符不能省略。具体用法参考下方示例。
+    \item[\meta{箭头}] 参数用来指示顶层的棱块或者角块的变换方向，参数形式同样是 \meta{comma list} ，逗号隔开的每一项是用数字加上 - 或者 = 连接的字符串，
+      数字表示对应位置的小方块编号（从1到9编号，九宫格顺序从左到右、从上到下），- 表示画一条从 - 字符前面的小方块指向 - 字符后面的小方块的箭头，= 则表示画一条双向箭头。
+    \item[\meta{公式类别}] 参数出现在公式编号下方，用来指示该公式的类别，例如 Ua、Ab、Ga 等。
+    \item[\meta{魔方公式}] 参数可以接收最好不超过5行的魔方公式。
+    \item[\meta{单位长度}] 用来设置 \env{tikzpicture} 环境的单位长度，默认为 3.9mm.
+  \end{description}
+\end{function}
+使用示例如下：
+\begin{dispExample*}{center lower,environment lower=spreadcontents}
+\PLL{-ll,uu,-r,-d}{3-7-9-3}{Ab}{x'(RU'R)D2\\(R'UR)D2R'2}
+\PLL{l-l,dd}{1-3-7-1,2-4-6-2}{Ga}{R2UR'UR'\\U'RU'R2\\(U'D)R'UR\\(D'U)}
+\PLL{ll,--u,r,-dd}{1=9,2=6}{V}{R'URU'R'f'\\(U'RU'2R')\\(U'RU'R')fR}
+\end{dispExample*}
+左边的公式编号是自增序号，可以通过修改变量 \cs{g_cube_pll_index_int} 来设置起始序号（默认为 0，先自增再排版，即从 1 开始）。
+\cs{PLL} 命令同样作为 coffin 封装的命令，它也是有固定的高度和宽度的。
+\begin{variable}{\gpllheight,\gpllwidth,\gcubepllbox,\g_cube_pll_index_int}
+  \begin{syntax}
+    \gcs{gpllheight} \\
+    \gcs{gpllwidth} \\
+    \gcs{gcubepllbox} \\
+    \gcs{g_cube_pll_index_int}
+  \end{syntax}
+  这四个变量分别表示 \cs{PLL} 的高度、宽度、 box 对象和已排版序号，可以用于自定义排版。
+\end{variable}
+% endregion
+
+% endregion
+
+% region 基础命令
+\section{基础命令}
+本节中的命令主要用于宏包内部封装，用户可以根据需要包装成自己合适的排版格式。上一节中的\cs{FLL}、\cs{OLL}、\cs{PLL}等
+命令都是基于这些基础命令进行 coffin 封装的。这些命令基本上都需要在\env{tikzpicture}环境中使用。
+
+% region \drawsquares
+\begin{function}{\drawsquares}
+  \begin{syntax}
+    \rcs{drawsquares}\oarg{\env{scope}环境参数}\marg{色块指示}\oarg{补充画图语句}\oarg{数字模式底色}
+  \end{syntax}
+  九宫格绘制命令。
+  \begin{description}[left=0pt,itemindent=-28pt,labelsep=1em]
+    \item[\meta{\env{scope}环境参数}] 可选参数，默认为空。用于设置把 \rcs{drawsquares}命令包裹在其中的\env{scope}环境的参数。
+    \item[\meta{色块指示}] 参数为 9 个字符的字符串，每个字符表示对应位置的小方块颜色，具体含义同\cs{Cube}命令中的颜色字符。也可以是1-9的数字，
+      专门用于本说明文档中，用于指示各字符所对应的小方块的位置。也可以是大写的 U/D/L/R 字符，专门用于\cs{OLL}命令中的顶面色块指示。
+    \item[\meta{补充画图语句}] 可选参数，默认为空。在\env{scope}环境结束前插入的画图语句。通常用法是把要插入的画图语句存入一个 seq 变量中，
+      然后把该 seq 变量传入此参数中。\cs{PLL}命令中即采用了这种方式来绘制箭头和条块。
+    \item[\meta{数字模式底色}] 可选参数，默认为空。在数字模式下使用的底色，用于区别不同面的底色。
+      该参数仅在\meta{色块指示}参数为数字模式时有效。如果不指定该参数，则使用默认的浅灰色作为底色。
+    \end{description}
+  \end{function}
+  具体用法参考下方示例，更多用法请参考宏包源码或者示例文档《三阶魔方CFOP教程》：
+\begin{dispExample*}{center lower,environment lower=spreadcontents}
+\tikz{\drawsquares{rwryroobo}}
+\tikz{\drawsquares{123456789}}
+\tikz{\drawsquares{L-UL-RL-D}}
+\end{dispExample*}
+% endregion
+
+% region \drawcube
+\begin{function}{\drawcube}
+  \begin{syntax}
+    \rcs{drawcube}\marg{正面}\marg{右侧面}\marg{顶面}\marg{单位长度}\marg{补充画图语句}
+  \end{syntax}
+  魔方三维绘制命令，前三个参数含义与\cs{Cube}命令几乎相同，区别是 \rcs{drawcube} 命令只能接收 9 字符的字符串。
+  与 \rcs{drawsquares} 命令类似， \rcs{drawcube} 命令的最后一个参数也提供了一个用于插入补充的画图语句。
+  \cs{CubeNotation} 命令即采用了这种方式来绘制魔方公式符号的箭头。
+\end{function}
+使用示例如下：
+\begin{dispExample*}{center lower,environment lower=spreadcontents}
+{\view{r}\tikz{\drawcube{-r--r----}{-b--b----}{-w-www-w-}{5mm}{}}}
+\tikz{\drawcube{---bb-bbb}{-r--rrrrr}{-----b---}{5mm}{}}
+\tikz{\drawcube{rwryroobo}{bbwyyyywg}{gggbbwwow}{5mm}{}}
+\tikz{\drawcube{bbbbbbbbb}{rrrrrrrrr}{yyyyyyyyy}{5mm}{}}
+\end{dispExample*}
+事实上， \rcs{drawcube} 命令就是对 \rcs{drawsquares} 命令的一个简单封装。
+% endregion
+
+% region \cubearrows
+\begin{function}{\cubearrows}
+  \begin{syntax}
+    \rcs{cubearrows}\marg{魔方公式符号}\marg{单位长度}
+  \end{syntax}
+  绘制魔方公式符号的带箭头指示的三维示意图，\meta{魔方公式符号} 参数表示魔方公式的各个转动符号。
+  \meta{单位长度} 用来设置 \env{scope} 环境的单位长度。与 \cs{CubeNotation} 近乎完全相同，区别只在于不带
+  下方的公式符号，因此更适合用于自定义排版，且必须在 \env{tikzpicture} 环境中使用。
+\end{function}
+使用示例如下：
+\begin{dispExample*}{sidebyside,lefthand width=0.4\textwidth}
+\tikz{\cubearrows{R2}{3mm}}
+\tikz{\cubearrows{b'}{3mm}}
+\tikz{\cubearrows{z}{3mm}}
 \end{dispExample*}
 % endregion
 
