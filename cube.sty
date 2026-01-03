@@ -63,6 +63,7 @@
                     y={( 90:  -1*##1)},
                     z={(200:-0.8*##1)}}}   % 从210改为200，更接近水平
             }
+        % {}{} % 后续用于用户自定义坐标轴
     } {#1}
 }
 \view{d} % 设置当前坐标轴为正二等轴测投影
@@ -198,7 +199,7 @@
             %     {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 OLL 等平面的公式示意图时方格间距宽一点
             %     {\dim_set:Nn \l_cube_linewidth_dim {\pgflinewidth}}  % 作为立体魔方的一部分时，方格间距窄一点
             % \tl_if_empty:oF {#3} {\dim_set:Nn \l_cube_linewidth_dim {4\pgflinewidth}} % 画 PLL 等平面的公式示意图时方格间距宽一点
-            \fill[\l_cube_tmpd_tl, draw=black!10,rounded~corners=4\pgflinewidth, line~width=\pgflinewidth]
+            \fill[\l_cube_tmpd_tl, draw=black!10,rounded~corners=2pt, line~width=\pgflinewidth]
                 (\l_cube_tmpc_int, 2 - \l_cube_tmpb_int) rectangle +(1, 1) node[black, pos=0.5] {\str_use:N \l_tmpb_str};
         }
 
@@ -690,6 +691,45 @@
     % \vspace{3pt}
     \TypesetCoffin \l_cube_output_coffin
     % \vspace{3pt}
+}
+% endregion
+
+% region \gen_bars_seq:Nn 函数定义
+% 生成插入到 \drawsquares 第三个可选参数的语句
+% 储存到一个 seq 变量中，也就是第一个参数
+% 第二个参数是 <comma list> ，每一项都是由三个字符组成，依顺时针顺序，从左侧下方边条开始，
+% 颜色指示字符仅限四种 o/g/r/b ，分别代表 橙色/绿色/红色/蓝色
+% 因为顶面和底面已经固定为黄色和白色，所以不需要指示
+\seq_new:N \l_cube_bars_seq  % 专门来存储生成的指令
+\seq_new:N \l_cube_barsa_seq % 临用来存储生成的指令
+\cs_new_protected:Npn \gen_bars_seq:Nn #1#2 {
+    \seq_clear:N \l_cube_barsa_seq
+    \clist_clear:N \l_tmpa_clist
+    \clist_set:Nn \l_tmpa_clist {#2}
+    \clist_log:N \l_tmpa_clist
+    \int_zero:N \l_tmpa_int
+
+    \clist_map_inline:Nn \l_tmpa_clist {
+        \int_zero:N \l_tmpb_int
+        \str_map_variable:nNn {##1} \l_tmpa_str {
+            \prop_get:NVNF \g_cube_color_map_prop \l_tmpa_str \l_tmpa_tl {\tl_set:Nn \l_tmpa_tl {black!30}\errmessage{Invalid~parameter~for~\gen_bars_seq:Nn}}
+            \seq_put_right:Ne \l_cube_barsa_seq {
+                \exp_not:N\path[rotatearound={-\int_use:N \l_tmpa_int * 90},fill=\tl_use:N \l_tmpa_tl] (-0.5,0.05+\int_use:N \l_tmpb_int) rectangle +(0.45,0.9);
+            }
+            \int_incr:N \l_tmpb_int
+        }
+        \int_incr:N \l_tmpa_int
+    }
+    \seq_log:N \l_cube_barsa_seq
+    % 将结果存储到第一个参数指定的序列中
+    \seq_set_eq:NN #1 \l_cube_barsa_seq
+}
+% endregion
+
+% region \drawsquareswithbars 函数定义
+\NewDocumentCommand{\drawsquareswithbars}{ m O{3.9mm} }{
+    \gen_bars_seq:Nn \l_cube_bars_seq {#1}
+    \drawsquares[x=#2,y=#2]{yyyyyyyyy}[\seq_use:Nn \l_cube_bars_seq {}]
 }
 % endregion
 
