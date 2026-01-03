@@ -4,7 +4,7 @@
 \usepackage{cube}
 \usepackage[skins,documentation]{tcolorbox}
 \usepackage{enumitem}
-\usepackage{array,tabularx,colortbl}
+\usepackage{array,tabularx,colortbl,booktabs}
 \usepackage{metalogo}
 \usepackage{pdfpages}
 
@@ -125,15 +125,15 @@
 
 {\noindent
 \begin{tabular*}{\textwidth}{*{4}{>{\centering\ttfamily}p{1cm}p{1.5cm}}}
-  \hline
+  \toprule
   字符 & 颜色 & 字符 & 颜色 & 字符 & 颜色 & 字符 & 颜色 \\
-  \hline
+  \midrule
   - & \textcolor{black!30}{浅灰色} & = & \textcolor{black!65}{深灰色} & g & \textcolor{green!70!black}{绿色} & b & \textcolor{niceblue}{蓝色} \\
   r & \textcolor{nicered}{红色} & w & \fcolorbox{white}{black}{\textcolor{white}{白色}} & o & \textcolor{orange}{橙色} & y & \textcolor{yellow!80!orange!90!black}{黄色} \\
-  \hline
+  \bottomrule
 \end{tabular*}}
 
-\bigskip
+\medskip
 实际使用中，可以根据需要选择合适的字符来表示不同颜色的小方块。例如，下面的例子展示了如何使用不同的颜色字符来绘制魔方的3D图：
 \begin{dispExample*}{center lower}
 \Cube{----b}{r--r-}{-----b---}
@@ -353,7 +353,7 @@
 \begin{dispExample*}{sidebyside,lefthand width=0.4\textwidth}
 \tikz{\cubearrows{R2}{3mm}}
 \tikz{\cubearrows{b'}{3mm}}
-\tikz{\cubearrows{z}{3mm}}
+\tikz{\cubearrows{y}{3mm}}
 \end{dispExample*}
 % endregion
 
