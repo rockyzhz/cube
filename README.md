@@ -33,6 +33,12 @@
 \end{document}
 ```
 
+## 示例效果
+
+![CFOP 公式示例第1页](CFOP-preview-0.png)
+
+![CFOP 公式示例第2页](CFOP-preview-1.png)
+
 ## 文件说明
 
 | 文件 | 说明 |
