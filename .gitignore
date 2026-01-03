@@ -41,3 +41,6 @@ missfont.log
 # LaTeX backup files
 *.bak
 *.backup
+
+# Linux bash
+*.sh
