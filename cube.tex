@@ -1,11 +1,12 @@
 % \documentclass{article}
 \documentclass[a4paper,11pt]{l3doc}
-% \usepackage[margin=1cm]{geometry}
 \usepackage[fontset=ubuntu]{ctex}
 \usepackage{cube}
 \usepackage[skins,documentation]{tcolorbox}
 \usepackage{enumitem}
 \usepackage{array,tabularx,colortbl}
+\usepackage{metalogo}
+\usepackage{pdfpages}
 
 % region 样式设置
 \let\oldmarg=\marg
@@ -356,5 +357,41 @@
 \end{dispExample*}
 % endregion
 
+% region \drawsquareswithbars
+\begin{function}{\drawsquareswithbars}
+  \begin{syntax}
+    \rcs{drawsquareswithbars}\marg{边块指示}\oarg{单位长度}
+  \end{syntax}
+  PLL 步骤图案绘制命令，与 \rcs{cubearrows} 命令不同的是，\rcs{drawsquareswithbars} 命令绘制的九宫格默认为顶面黄色，
+  边块较宽，且区分颜色，不带箭头，专门用于绘制 PLL 步骤中顶层边块的分布情况。
+  \begin{description}
+    \item[\meta{边块指示}] 参数为 \meta{comma list} ，逗号隔开的每一项都是一个包含3个字符的字符串。由于默认顶面为黄色，
+      底面为白色，因此边块颜色仅有橙色、绿色、红色和蓝色四种，分别用小写字母 o/g/r/b 表示。每个字符串字符排列顺序依顺时针方向
+      从左侧下方开始依次指示。
+    \item[\meta{单位长度}] 可选参数，默认为 3.9mm 。用于设置 \env{scope} 环境的单位长度。
+  \end{description}
+\end{function}
+使用示例如下：
+\begin{dispExample*}{center lower}
+\tikz{\drawsquareswithbars{oro,gog,rgr,bbb}}~
+\tikz{\drawsquareswithbars{ogo,grg,ror,bbb}}~
+\tikz{\drawsquareswithbars{oro,gbg,ror,bgb}}~
+\tikz{\drawsquareswithbars{bob,obo,grg,rgr}}
+\end{dispExample*}
+% \rcs{drawsquareswithbars} 命令可以很方便地经过封装之后，用于绘制 PLL 步骤中顶层边块的分布情况。
+% endregion
+% endregion
+
+% region 编译相关事项
+\section{编译相关事项}
+本宏包重度依赖 \pkg{TikZ} 宏包，而 \pkg{TikZ} 宏包在较为复杂的图形绘制时会消耗较多的编译资源，
+因此建议使用 \LuaLaTeX 引擎进行编译，以获得更好的性能和兼容性。另外，\cs{CubeLogo} 命令使用了
+中文字体，为了确保其正常显示，建议使用带 fontset 选项的 \pkg{ctex} 宏包进行编译。
+% endregion
+
+% region 作品示例
+\section{作品示例}
+\vspace{-1ex}
+\includepdf[angle=-90,pages=-]{CFOP.pdf}
 % endregion
 \end{document}
