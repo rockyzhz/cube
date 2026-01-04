@@ -15,25 +15,32 @@
 ## 快速开始
 
 ```latex
-\documentclass{article}
+\documentclass{standalone}
 \usepackage{ctex}
 \usepackage{cube}
 
 \begin{document}
 
-% 绘制三面视图的魔方
+% 绘制 Logo 和三面视图的魔方
+\CubeLogo
 \Cube{----b}{r--r-}{-----b---}
-\Cube{---bb-bbb}{-r--rrrrr}{-----b---}
-\Cube{rwryroobo}{bbwyyyywg}{gggbbwwow}
-\Cube{bbbbbbbbb}{rrrrrrrrr}{yyyyyyyyy}
-
-% 绘制魔方公式符号
-\CubeNotation{U'}
 
 \end{document}
 ```
 
-## 示例效果
+保存为`test.tex`，然后用`xelatex`或者`lualatex`去编译该文件
+```bash
+xelatex test.tex
+```
+或者
+```bash
+lualatex test.tex
+```
+可以得到：
+
+![test.pdf](test-preview.png)
+
+## 完整的三阶魔方 CFOP 教程效果：
 
 ![CFOP 公式示例第1页](CFOP-preview-0.png)
 
