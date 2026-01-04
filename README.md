@@ -63,4 +63,4 @@
 
 ## 许可证
 
-MIT License
+[LPPL v3](https://www.latex-project.org/lppl/lppl-3.html)
