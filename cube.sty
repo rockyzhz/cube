@@ -81,7 +81,7 @@
 % region \CubeLogo
 \NewDocumentCommand{\CubeLogo}{ O{1} }{{ % 加一层 {} ，让 \view{i} 的影响范围仅限于本命令自身
     \view{i}
-    \heiti\normalsize
+    \heiti\normalsize\hspace{-3em}
     \scalebox{#1}{
     \begin{tikzpicture}[3d cube={1cm}]
         \begin{scope}[canvas is zx plane at y=1,rotate=90]
@@ -346,7 +346,7 @@
 
     % 输出（上下居中对齐）
     % \vspace{3pt}
-    \TypesetCoffin \l_cube_output_coffin
+    \TypesetCoffin \l_cube_output_coffin [b,l]
     % \vspace{3pt}
 }
 % endregion
@@ -491,7 +491,7 @@
                  \l_cube_index_coffin[t,hc] (0pt,-.5ex)
     \JoinCoffins \l_cube_output_coffin[\l_cube_index_coffin-b,\l_cube_index_coffin-hc]
                  \l_cube_height_coffin[t,hc] (0pt,-2.5ex)
-    \TypesetCoffin \l_cube_output_coffin
+    \TypesetCoffin \l_cube_output_coffin [b,l]
 }
 % endregion
 
@@ -544,7 +544,7 @@
 
     % 输出（上下居中对齐）
     % \vspace{3pt}
-    \TypesetCoffin \l_cube_output_coffin
+    \TypesetCoffin \l_cube_output_coffin [b,l]
     % \vspace{3pt}
 }
 % endregion
@@ -689,7 +689,7 @@
 
     % 输出（上下居中对齐）
     % \vspace{3pt}
-    \TypesetCoffin \l_cube_output_coffin
+    \TypesetCoffin \l_cube_output_coffin [b,l]
     % \vspace{3pt}
 }
 % endregion
