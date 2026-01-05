@@ -24,6 +24,9 @@
 % 绘制 Logo 和三面视图的魔方
 \CubeLogo
 \Cube{----b}{r--r-}{-----b---}
+\FLL{----b}{r--r-}{-----b---}{(R'F'RU)\\(RU'R'F)}
+\OLL{-UUL-RLD-}{(RUR'U)\\(R'FRF')\\U2(R'FRF')}
+\PLL{-ll,uu,-r,-d}{3-7-9-3}{Ab}{x'(RU'R)D2\\(R'UR)D2R'2}
 
 \end{document}
 ```
