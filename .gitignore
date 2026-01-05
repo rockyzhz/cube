@@ -23,6 +23,7 @@
 *.glo
 *.hd
 *.tcbtemp
+test.tex
 
 # LaTeX beamer files
 *.nav
